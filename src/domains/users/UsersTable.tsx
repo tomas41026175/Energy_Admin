@@ -97,6 +97,15 @@ export const UsersTable = ({ params, onPageChange }: UsersTableProps) => {
   )
 }
 
+const ELLIPSIS = '...' as const
+
+const getPageWindow = (current: number, total: number): (number | typeof ELLIPSIS)[] => {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
+  if (current <= 4) return [1, 2, 3, 4, 5, ELLIPSIS, total]
+  if (current >= total - 3) return [1, ELLIPSIS, total - 4, total - 3, total - 2, total - 1, total]
+  return [1, ELLIPSIS, current - 1, current, current + 1, ELLIPSIS, total]
+}
+
 interface PaginationProps {
   currentPage: number
   totalPages: number
@@ -116,15 +125,18 @@ const Pagination = ({ currentPage, totalPages, onPageChange }: PaginationProps) 
         Previous
       </button>
 
-      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+      {getPageWindow(currentPage, totalPages).map((page) => (
         <button
           key={page}
-          onClick={() => onPageChange(page)}
+          onClick={() => typeof page === 'number' && onPageChange(page)}
+          disabled={typeof page !== 'number'}
           className={cn(
             'px-3 py-1 text-sm border rounded',
             page === currentPage
               ? 'bg-blue-600 text-white border-blue-600'
-              : 'hover:bg-gray-50',
+              : typeof page === 'number'
+                ? 'hover:bg-gray-50'
+                : 'cursor-default border-transparent',
           )}
         >
           {page}

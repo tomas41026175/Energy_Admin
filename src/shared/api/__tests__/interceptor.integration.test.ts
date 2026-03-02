@@ -83,7 +83,7 @@ describe('response interceptor - token refresh', () => {
       http.post(`${API_BASE}/auth/refresh`, () => {
         return HttpResponse.json({
           access_token: 'new-access-token',
-          refresh_token: 'new-refresh-token',
+          expires_in: 300,
         })
       }),
     )
@@ -93,7 +93,8 @@ describe('response interceptor - token refresh', () => {
     expect(response.data).toEqual({ data: 'success' })
     expect(callCount).toBe(2)
     expect(tokenStore.getAccessToken()).toBe('new-access-token')
-    expect(tokenStore.getRefreshToken()).toBe('new-refresh-token')
+    // Refresh token is NOT rotated by /auth/refresh — original stays intact
+    expect(tokenStore.getRefreshToken()).toBe('valid-refresh-token')
   })
 
   it('should clear tokens and reject when refresh fails', async () => {
@@ -126,7 +127,7 @@ describe('response interceptor - token refresh', () => {
         refreshCalled = true
         return HttpResponse.json({
           access_token: 'new-access-token',
-          refresh_token: 'new-refresh-token',
+          expires_in: 300,
         })
       }),
     )

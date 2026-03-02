@@ -1,7 +1,13 @@
 import { create } from 'zustand'
+import { z } from 'zod'
 import { authApi } from './auth.api'
 import { tokenStore } from '@/shared/api/token-store'
 import type { AuthState, AuthUser, LoginRequest } from './auth.types'
+
+const authUserSchema = z.object({
+  username: z.string(),
+  role: z.string(),
+})
 
 const USER_STORAGE_KEY = 'auth_user'
 
@@ -9,7 +15,7 @@ const getStoredUser = (): AuthUser | null => {
   const stored = localStorage.getItem(USER_STORAGE_KEY)
   if (!stored) return null
   try {
-    return JSON.parse(stored) as AuthUser
+    return authUserSchema.parse(JSON.parse(stored))
   } catch {
     return null
   }

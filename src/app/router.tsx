@@ -31,14 +31,14 @@ export const router = createBrowserRouter([
           </Suspense>
         ),
       },
+      // Authenticated users hitting unknown paths → /users
+      { path: '*', element: <Navigate to="/users" replace /> },
     ],
   },
   {
     path: '/',
     element: <Navigate to="/login" replace />,
   },
-  {
-    path: '*',
-    element: <Navigate to="/login" replace />,
-  },
+  // Unauthenticated users → AuthGuard redirects to /login
+  { path: '*', element: <Navigate to="/login" replace /> },
 ])
