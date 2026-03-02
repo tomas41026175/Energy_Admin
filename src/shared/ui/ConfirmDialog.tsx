@@ -49,11 +49,7 @@ export const ConfirmDialog = ({
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel
-                className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl"
-                role="dialog"
-                aria-modal="true"
-              >
+              <Dialog.Panel className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
                 <Dialog.Title as="h3" className="text-base font-semibold text-gray-900 mb-2">
                   {title}
                 </Dialog.Title>

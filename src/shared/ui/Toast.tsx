@@ -1,8 +1,6 @@
 import { useCallback, useState, type ReactNode } from 'react'
 import { cn } from '@/shared/utils/cn'
-import { ToastContext, type Toast } from '@/shared/hooks/useToast'
-
-type ToastType = 'success' | 'error' | 'warning' | 'info'
+import { ToastContext, type Toast, type ToastType } from '@/shared/hooks/useToast'
 
 interface ToastProviderProps {
   children: ReactNode
@@ -63,7 +61,7 @@ const ToastItem = ({ toast, onClose }: ToastItemProps) => {
         className="ml-4 text-current opacity-50 hover:opacity-100"
         aria-label="Close"
       >
-        x
+        ×
       </button>
     </div>
   )
