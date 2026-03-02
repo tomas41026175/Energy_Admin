@@ -6,9 +6,10 @@ export const handlers = [
   http.get(`${API_BASE}/api/users`, () => {
     return HttpResponse.json({
       data: [
-        { id: '1', name: 'Test User', email: 'test@example.com', status: 'active' },
+        { id: 1, name: 'Test User', email: 'test@example.com', avatar: '', status: 'active', created_at: '2026-01-01' },
+        { id: 2, name: 'Jane Doe', email: 'jane@example.com', avatar: '', status: 'inactive', created_at: '2026-01-02' },
       ],
-      pagination: { total: 1, current_page: 1, per_page: 10, total_pages: 1 },
+      pagination: { total: 2, current_page: 1, per_page: 10, total_pages: 1 },
     })
   }),
 
