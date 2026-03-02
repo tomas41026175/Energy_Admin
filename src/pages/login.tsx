@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { loginRequestSchema, type LoginRequestInput } from '@/auth/auth.schemas'
 import { useAuthStore } from '@/auth/auth.store'
-import { cn } from '@/shared/utils/cn'
+import { Button } from '@/shared/ui/Button'
+import { Input } from '@/shared/ui/Input'
 
 const LoginPage = () => {
   const navigate = useNavigate()
@@ -31,72 +32,54 @@ const LoginPage = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-md">
-        <h1 className="text-2xl font-bold text-center text-gray-900 mb-8">Energy Admin</h1>
+    <>
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded-lg"
+      >
+        Skip to main content
+      </a>
 
-        <form
-          onSubmit={(e) => void handleSubmit(onSubmit)(e)}
-          className="bg-white shadow-sm rounded-lg p-8 space-y-6"
-        >
-          {submitError && (
-            <div className="bg-red-50 text-red-700 px-4 py-3 rounded-lg text-sm" role="alert">
-              {submitError}
-            </div>
-          )}
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+        <div className="w-full max-w-md">
+          <h1 className="text-2xl font-bold text-center text-gray-900 mb-8">Energy Admin</h1>
 
-          <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
-              Username
-            </label>
-            <input
-              id="username"
-              type="text"
-              autoComplete="username"
-              {...register('username')}
-              className={cn(
-                'w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500',
-                errors.username ? 'border-red-300' : 'border-gray-300',
+          <main id="main-content">
+            <form
+              onSubmit={(e) => void handleSubmit(onSubmit)(e)}
+              className="bg-white shadow-sm rounded-lg p-8 space-y-6"
+              noValidate
+            >
+              {submitError && (
+                <div className="bg-red-50 text-red-700 px-4 py-3 rounded-lg text-sm" role="alert">
+                  {submitError}
+                </div>
               )}
-            />
-            {errors.username && (
-              <p className="mt-1 text-sm text-red-600">{errors.username.message}</p>
-            )}
-          </div>
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              autoComplete="current-password"
-              {...register('password')}
-              className={cn(
-                'w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500',
-                errors.password ? 'border-red-300' : 'border-gray-300',
-              )}
-            />
-            {errors.password && (
-              <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
-            )}
-          </div>
+              <Input
+                label="Username"
+                type="text"
+                autoComplete="username"
+                error={errors.username?.message}
+                {...register('username')}
+              />
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-          >
-            {isSubmitting ? (
-              <span className="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            ) : (
-              'Sign In'
-            )}
-          </button>
-        </form>
+              <Input
+                label="Password"
+                type="password"
+                autoComplete="current-password"
+                error={errors.password?.message}
+                {...register('password')}
+              />
+
+              <Button type="submit" variant="primary" size="md" isLoading={isSubmitting} className="w-full">
+                Sign In
+              </Button>
+            </form>
+          </main>
+        </div>
       </div>
-    </div>
+    </>
   )
 }
 

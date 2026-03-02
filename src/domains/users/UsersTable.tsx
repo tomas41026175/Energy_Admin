@@ -1,6 +1,10 @@
 import { useUsers } from './users.hooks'
-import type { UsersParams } from './users.types'
+import type { User, UsersParams } from './users.types'
 import { cn } from '@/shared/utils/cn'
+import { Skeleton } from '@/shared/ui/Skeleton'
+import { ErrorMessage } from '@/shared/ui/ErrorMessage'
+import { EmptyState } from '@/shared/ui/EmptyState'
+import { Button } from '@/shared/ui/Button'
 
 interface UsersTableProps {
   params: UsersParams
@@ -16,76 +20,71 @@ export const UsersTable = ({ params, onPageChange }: UsersTableProps) => {
 
   if (isError) {
     return (
-      <div className="text-center py-12">
-        <p className="text-red-600 mb-4">{error?.message ?? 'Failed to load users'}</p>
-        <button
-          onClick={() => void refetch()}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-        >
-          Retry
-        </button>
-      </div>
+      <ErrorMessage
+        message={error?.message ?? 'Failed to load users'}
+        onRetry={() => void refetch()}
+      />
     )
   }
 
   if (!data || data.data.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-gray-500">No users found</p>
-      </div>
-    )
+    return <EmptyState title="No users found" description="There are no users to display." />
   }
 
   const { pagination } = data
 
   return (
     <div className={cn('relative', isPlaceholderData && 'opacity-60')}>
-      <div className="overflow-x-auto">
+      {/* Desktop / Tablet table (hidden on mobile) */}
+      <div className="hidden sm:block overflow-x-auto rounded-lg border border-gray-200">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th
+                scope="col"
+                className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
                 ID
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th
+                scope="col"
+                className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
                 Name
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th
+                scope="col"
+                className="hidden lg:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
                 Email
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th
+                scope="col"
+                className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
                 Status
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th
+                scope="col"
+                className="hidden lg:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
                 Created At
               </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {data.data.map((user) => (
-              <tr key={user.id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.id}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.name}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.email}</td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span
-                    className={cn(
-                      'px-2 py-1 text-xs font-medium rounded-full',
-                      user.status === 'active'
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-gray-100 text-gray-800',
-                    )}
-                  >
-                    {user.status}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {user.created_at}
-                </td>
-              </tr>
+              <TableRow key={user.id} user={user} />
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile card list (hidden on sm+) */}
+      <div className="sm:hidden space-y-3">
+        {data.data.map((user) => (
+          <UserCard key={user.id} user={user} />
+        ))}
       </div>
 
       <Pagination
@@ -96,6 +95,61 @@ export const UsersTable = ({ params, onPageChange }: UsersTableProps) => {
     </div>
   )
 }
+
+interface TableRowProps {
+  user: User
+}
+
+const TableRow = ({ user }: TableRowProps) => (
+  <tr className="hover:bg-gray-50 transition-colors duration-100">
+    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{user.id}</td>
+    <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{user.name}</td>
+    <td className="hidden lg:table-cell px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+      {user.email}
+    </td>
+    <td className="px-4 py-3 whitespace-nowrap">
+      <StatusBadge status={user.status} />
+    </td>
+    <td className="hidden lg:table-cell px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+      {user.created_at}
+    </td>
+  </tr>
+)
+
+interface UserCardProps {
+  user: User
+}
+
+const UserCard = ({ user }: UserCardProps) => (
+  <div className="bg-white rounded-lg border border-gray-200 p-4 space-y-2 animate-fade-in">
+    <div className="flex items-start justify-between gap-2">
+      <div>
+        <p className="text-sm font-medium text-gray-900">{user.name}</p>
+        <p className="text-xs text-gray-500 mt-0.5">{user.email}</p>
+      </div>
+      <StatusBadge status={user.status} />
+    </div>
+    <div className="flex items-center justify-between text-xs text-gray-400">
+      <span>ID: {user.id}</span>
+      <span>{user.created_at}</span>
+    </div>
+  </div>
+)
+
+interface StatusBadgeProps {
+  status: User['status']
+}
+
+const StatusBadge = ({ status }: StatusBadgeProps) => (
+  <span
+    className={cn(
+      'inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full',
+      status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800',
+    )}
+  >
+    {status}
+  </span>
+)
 
 const ELLIPSIS = '...' as const
 
@@ -116,49 +170,56 @@ const Pagination = ({ currentPage, totalPages, onPageChange }: PaginationProps) 
   if (totalPages <= 1) return null
 
   return (
-    <div className="flex items-center justify-center gap-2 py-4">
-      <button
+    <nav aria-label="Pagination" className="flex items-center justify-center gap-1 py-4">
+      <Button
+        variant="secondary"
+        size="sm"
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage <= 1}
-        className="px-3 py-1 text-sm border rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+        aria-label="Go to previous page"
       >
         Previous
-      </button>
+      </Button>
 
-      {getPageWindow(currentPage, totalPages).map((page) => (
+      {getPageWindow(currentPage, totalPages).map((page, idx) => (
         <button
-          key={page}
+          key={typeof page === 'number' ? page : `ellipsis-${idx}`}
           onClick={() => typeof page === 'number' && onPageChange(page)}
           disabled={typeof page !== 'number'}
+          aria-label={typeof page === 'number' ? `Go to page ${page}` : undefined}
+          aria-current={page === currentPage ? 'page' : undefined}
           className={cn(
-            'px-3 py-1 text-sm border rounded',
+            'w-8 h-8 flex items-center justify-center text-sm rounded-lg border transition-colors duration-100',
+            'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1',
             page === currentPage
               ? 'bg-blue-600 text-white border-blue-600'
               : typeof page === 'number'
-                ? 'hover:bg-gray-50'
-                : 'cursor-default border-transparent',
+                ? 'border-gray-200 hover:bg-gray-50'
+                : 'cursor-default border-transparent text-gray-400',
           )}
         >
           {page}
         </button>
       ))}
 
-      <button
+      <Button
+        variant="secondary"
+        size="sm"
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage >= totalPages}
-        className="px-3 py-1 text-sm border rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+        aria-label="Go to next page"
       >
         Next
-      </button>
-    </div>
+      </Button>
+    </nav>
   )
 }
 
 const SkeletonTable = () => (
-  <div className="animate-pulse">
-    <div className="h-10 bg-gray-200 rounded mb-2" />
+  <div className="space-y-2" aria-label="Loading users" aria-busy="true">
+    <Skeleton variant="rectangular" height={40} className="w-full" />
     {Array.from({ length: 5 }, (_, i) => (
-      <div key={i} className="h-14 bg-gray-100 rounded mb-1" />
+      <Skeleton key={i} variant="rectangular" height={56} className="w-full" />
     ))}
   </div>
 )
