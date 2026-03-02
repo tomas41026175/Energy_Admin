@@ -84,8 +84,21 @@ src/
 
 ## 📋 前置需求
 
-- Node.js 18+
-- npm 或 yarn 或 pnpm
+- Node.js 20+
+- npm
+
+---
+
+## 🔧 環境變數
+
+複製 `.env.example` 為 `.env`：
+```bash
+cp .env.example .env
+```
+
+| 變數名稱 | 說明 | 範例值 |
+|---------|------|--------|
+| `VITE_API_BASE_URL` | API Base URL | `https://lbbj5pioquwxdexqmcnwaxrpce0lcoqx.lambda-url.ap-southeast-1.on.aws` |
 
 ---
 
@@ -100,6 +113,7 @@ password: password123
 ### 開發伺服器
 ```bash
 npm install
+cp .env.example .env
 npm run dev
 ```
 
@@ -176,6 +190,19 @@ npm run build
 # 預覽生產版本
 npm run preview
 ```
+
+---
+
+## 🚢 部署（Vercel）
+
+1. 在 Vercel Dashboard 匯入 GitHub Repository
+2. Framework Preset: **Vite**
+3. Build Command: `npm run build`
+4. Output Directory: `dist`
+5. 設定環境變數：`VITE_API_BASE_URL`
+6. Push to `main` 觸發 Production 部署，開 PR 觸發 Preview 部署
+
+CI/CD 由 GitHub Actions 自動執行 lint、type-check、test、build。
 
 ---
 
