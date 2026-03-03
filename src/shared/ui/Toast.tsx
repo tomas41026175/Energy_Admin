@@ -59,7 +59,7 @@ const ToastItem = ({ toast, onClose }: ToastItemProps) => {
       <button
         onClick={onClose}
         className="ml-4 text-current opacity-50 hover:opacity-100"
-        aria-label="Close"
+        aria-label="關閉"
       >
         ×
       </button>

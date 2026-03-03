@@ -27,7 +27,7 @@ const LoginPage = () => {
       await login(data)
       navigate('/users', { replace: true })
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : 'Login failed')
+      setSubmitError(err instanceof Error ? err.message : '登入失敗')
     }
   }
 
@@ -37,7 +37,7 @@ const LoginPage = () => {
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded-lg"
       >
-        Skip to main content
+        跳至主要內容
       </a>
 
       <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
@@ -57,7 +57,7 @@ const LoginPage = () => {
               )}
 
               <Input
-                label="Username"
+                label="帳號"
                 type="text"
                 autoComplete="username"
                 error={errors.username?.message}
@@ -65,7 +65,7 @@ const LoginPage = () => {
               />
 
               <Input
-                label="Password"
+                label="密碼"
                 type="password"
                 autoComplete="current-password"
                 error={errors.password?.message}
@@ -73,7 +73,7 @@ const LoginPage = () => {
               />
 
               <Button type="submit" variant="primary" size="md" isLoading={isSubmitting} className="w-full">
-                Sign In
+                登入
               </Button>
             </form>
           </main>

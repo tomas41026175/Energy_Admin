@@ -8,9 +8,9 @@ import { useDebounce } from '@/shared/hooks/useDebounce'
 import type { UserStatus } from '@/domains/users/users.types'
 
 const STATUS_OPTIONS: { value: UserStatus | ''; label: string }[] = [
-  { value: '', label: 'All' },
-  { value: 'active', label: 'Active' },
-  { value: 'inactive', label: 'Inactive' },
+  { value: '', label: '全部' },
+  { value: 'active', label: '啟用' },
+  { value: 'inactive', label: '停用' },
 ]
 
 const UsersPage = () => {
@@ -26,7 +26,7 @@ const UsersPage = () => {
 
   const handleLogout = (): void => {
     logout()
-    addToast('info', 'You have been signed out.')
+    addToast('info', '您已登出。')
   }
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -52,19 +52,19 @@ const UsersPage = () => {
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded-lg"
       >
-        Skip to main content
+        跳至主要內容
       </a>
 
       <div className="min-h-screen bg-gray-50">
         <header className="bg-white shadow-sm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-            <h1 className="text-xl font-semibold text-gray-900">Users</h1>
+            <h1 className="text-xl font-semibold text-gray-900">使用者管理</h1>
             <div className="flex items-center gap-3 sm:gap-4">
               {user && (
                 <span className="hidden sm:inline text-sm text-gray-600">{user.username}</span>
               )}
               <Button variant="danger" size="sm" onClick={handleLogout}>
-                Logout
+                登出
               </Button>
             </div>
           </div>
@@ -75,17 +75,17 @@ const UsersPage = () => {
           <div className="flex flex-col sm:flex-row gap-3 mb-6">
             <div className="flex-1">
               <Input
-                placeholder="Search by name…"
+                placeholder="搜尋姓名…"
                 value={searchInput}
                 onChange={handleSearchChange}
-                aria-label="Search users by name"
+                aria-label="依姓名搜尋使用者"
               />
             </div>
             <div className="sm:w-40">
               <select
                 value={statusFilter}
                 onChange={handleStatusChange}
-                aria-label="Filter by status"
+                aria-label="依狀態篩選"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 {STATUS_OPTIONS.map(({ value, label }) => (
