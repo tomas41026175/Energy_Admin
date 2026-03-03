@@ -1,5 +1,6 @@
 import { Navigate, Outlet } from 'react-router-dom'
 import { useAuthStore } from './auth.store'
+import { Spinner } from '@/shared/ui/Spinner'
 
 export const AuthGuard = () => {
   const { isAuthenticated, isLoading } = useAuthStore()
@@ -7,7 +8,7 @@ export const AuthGuard = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-500">載入中…</div>
+        <Spinner size="lg" className="text-blue-600" />
       </div>
     )
   }
