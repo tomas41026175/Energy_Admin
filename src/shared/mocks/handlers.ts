@@ -26,10 +26,7 @@ export const handlers = [
     const url = new URL(request.url)
     const name = url.searchParams.get('name') ?? ''
     const email = url.searchParams.get('email') ?? ''
-    const idParam = url.searchParams.get('id')
     const status = url.searchParams.get('status') ?? ''
-    const createdFrom = url.searchParams.get('createdFrom') ?? ''
-    const createdTo = url.searchParams.get('createdTo') ?? ''
     const page = parseInt(url.searchParams.get('page') ?? '1', 10)
     const limit = parseInt(url.searchParams.get('limit') ?? '10', 10)
 
@@ -41,19 +38,9 @@ export const handlers = [
     if (email) {
       filtered = filtered.filter(u => u.email.toLowerCase().includes(email.toLowerCase()))
     }
-    if (idParam) {
-      filtered = filtered.filter(u => u.id === parseInt(idParam, 10))
-    }
     if (status) {
       filtered = filtered.filter(u => u.status === status)
     }
-    if (createdFrom) {
-      filtered = filtered.filter(u => u.created_at >= createdFrom)
-    }
-    if (createdTo) {
-      filtered = filtered.filter(u => u.created_at <= createdTo)
-    }
-
     const total = filtered.length
     const start = (page - 1) * limit
     const data = filtered.slice(start, start + limit)

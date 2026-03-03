@@ -15,9 +15,6 @@ export interface UsersParams {
   name?: string
   email?: string
   status?: UserStatus
-  id?: number
-  createdFrom?: string
-  createdTo?: string
 }
 
 export interface UsersResponse {
