@@ -136,4 +136,82 @@ describe('response interceptor - token refresh', () => {
 
     expect(refreshCalled).toBe(false)
   })
+
+  it('should reject immediately when no refresh token on TOKEN_EXPIRED', async () => {
+    // Set expired access token but NO refresh token
+    tokenStore.setAccessToken('expired-token')
+    tokenStore.clearAll()
+    tokenStore.setAccessToken('expired-token')
+    // refresh token is null now
+
+    server.use(
+      http.get(`${API_BASE}/api/protected`, () => {
+        return HttpResponse.json(
+          { message: 'Token expired', code: 'TOKEN_EXPIRED' },
+          { status: 401 },
+        )
+      }),
+    )
+
+    await expect(apiClient.get('/api/protected')).rejects.toThrow(AuthError)
+    expect(tokenStore.getAccessToken()).toBeNull()
+  })
+
+  it('should queue concurrent requests and reject all when refresh fails', async () => {
+    let refreshCount = 0
+
+    server.use(
+      http.get(`${API_BASE}/api/protected`, () => {
+        return HttpResponse.json(
+          { message: 'Token expired', code: 'TOKEN_EXPIRED' },
+          { status: 401 },
+        )
+      }),
+      http.post(`${API_BASE}/auth/refresh`, () => {
+        refreshCount++
+        return HttpResponse.json({ message: 'Invalid refresh token' }, { status: 401 })
+      }),
+    )
+
+    const [r1, r2] = await Promise.allSettled([
+      apiClient.get('/api/protected'),
+      apiClient.get('/api/protected'),
+    ])
+
+    expect(r1.status).toBe('rejected')
+    expect(r2.status).toBe('rejected')
+    expect(refreshCount).toBe(1)
+  })
+
+  it('should queue concurrent requests and retry all after single refresh', async () => {
+    let refreshCount = 0
+
+    server.use(
+      http.get(`${API_BASE}/api/protected`, ({ request }) => {
+        const auth = request.headers.get('Authorization')
+        if (auth === 'Bearer expired-token') {
+          return HttpResponse.json(
+            { message: 'Token expired', code: 'TOKEN_EXPIRED' },
+            { status: 401 },
+          )
+        }
+        return HttpResponse.json({ ok: true })
+      }),
+      http.post(`${API_BASE}/auth/refresh`, async () => {
+        refreshCount++
+        return HttpResponse.json({ access_token: 'new-access-token', expires_in: 300 })
+      }),
+    )
+
+    // Fire two concurrent requests
+    const [r1, r2] = await Promise.all([
+      apiClient.get('/api/protected'),
+      apiClient.get('/api/protected'),
+    ])
+
+    expect(r1.data).toEqual({ ok: true })
+    expect(r2.data).toEqual({ ok: true })
+    // Only one refresh should have occurred
+    expect(refreshCount).toBe(1)
+  })
 })
