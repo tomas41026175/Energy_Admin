@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { UsersTable } from '@/domains/users/UsersTable'
 import { Input } from '@/shared/ui/Input'
 import { useDebounce } from '@/shared/hooks/useDebounce'
+import { DEBOUNCE_DELAY } from '@/shared/constants'
 import type { UserStatus } from '@/domains/users/users.types'
 
 const STATUS_OPTIONS: { value: UserStatus | ''; label: string }[] = [
@@ -15,7 +16,7 @@ const UsersPage = () => {
   const [searchInput, setSearchInput] = useState('')
   const [statusFilter, setStatusFilter] = useState<UserStatus | ''>('')
 
-  const debouncedSearch = useDebounce(searchInput, 400)
+  const debouncedSearch = useDebounce(searchInput, DEBOUNCE_DELAY)
 
   // 含 @ 自動路由至 email，否則路由至 name
   const isEmailSearch = debouncedSearch.includes('@')
