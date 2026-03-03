@@ -258,4 +258,47 @@ describe('UsersTable', () => {
     render(<UsersTable params={{ page: 3, limit: 10 }} onPageChange={vi.fn()} />)
     expect(screen.getByRole('button', { name: /下一頁/i })).toBeDisabled()
   })
+
+  describe('formatDateUTC8 (via render)', () => {
+    const renderWithDate = (created_at: string) => {
+      mockUseUsers.mockReturnValue({
+        ...defaultHookResult,
+        data: {
+          data: [{ ...mockUsers[0], created_at }],
+          pagination: mockPagination,
+        },
+      } as unknown as ReturnType<typeof useUsers>)
+      return render(<UsersTable params={{ page: 1, limit: 10 }} onPageChange={vi.fn()} />)
+    }
+
+    it('formats date-only string without time component', () => {
+      renderWithDate('2026-06-15')
+      const expected = new Intl.DateTimeFormat('zh-TW', {
+        timeZone: 'Asia/Taipei',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).format(new Date('2026-06-15'))
+      expect(screen.getAllByText(expected).length).toBeGreaterThan(0)
+    })
+
+    it('converts ISO timestamp to UTC+8 with time', () => {
+      // 2026-06-15T00:00:00Z → UTC+8 → 2026-06-15 08:00
+      renderWithDate('2026-06-15T00:00:00Z')
+      const expected = new Intl.DateTimeFormat('zh-TW', {
+        timeZone: 'Asia/Taipei',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+      }).format(new Date('2026-06-15T00:00:00Z'))
+      expect(screen.getAllByText(expected).length).toBeGreaterThan(0)
+    })
+
+    it('returns original string for invalid date', () => {
+      renderWithDate('not-a-date')
+      expect(screen.getAllByText('not-a-date').length).toBeGreaterThan(0)
+    })
+  })
 })
