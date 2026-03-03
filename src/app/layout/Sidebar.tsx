@@ -97,8 +97,8 @@ const SidebarContent = ({ onClose }: { onClose?: () => void }) => (
 
 export const Sidebar = ({ isOpen, onClose }: SidebarProps) => (
   <>
-    {/* Desktop sidebar — always visible on lg+ */}
-    <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:shrink-0 bg-white border-r border-gray-200">
+    {/* Desktop sidebar — sticky, always visible on lg+ */}
+    <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:shrink-0 bg-white border-r border-gray-200 sticky top-0 h-screen">
       <SidebarContent />
     </aside>
 
