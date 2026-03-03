@@ -61,7 +61,7 @@ describe('ToastProvider', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Show Toast' }))
     expect(screen.getByText('Closeable')).toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('button', { name: /close/i }))
+    fireEvent.click(screen.getByRole('button', { name: /關閉/i }))
     expect(screen.queryByText('Closeable')).not.toBeInTheDocument()
   })
 
