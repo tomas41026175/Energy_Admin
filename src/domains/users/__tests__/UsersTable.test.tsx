@@ -122,7 +122,7 @@ describe('UsersTable', () => {
     } as unknown as ReturnType<typeof useUsers>)
 
     render(<UsersTable params={{ page: 1, limit: 10 }} onPageChange={vi.fn()} />)
-    fireEvent.click(screen.getByRole('button', { name: /retry/i }))
+    fireEvent.click(screen.getByRole('button', { name: /重試/ }))
     expect(refetch).toHaveBeenCalledOnce()
   })
 

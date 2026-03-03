@@ -27,7 +27,7 @@ export const ErrorMessage = ({ message, onRetry }: ErrorMessageProps) => {
       <p className="text-red-600 mb-4 text-sm">{message}</p>
       {onRetry && (
         <Button variant="primary" size="sm" onClick={onRetry}>
-          Retry
+          重試
         </Button>
       )}
     </div>

@@ -16,7 +16,7 @@ describe('ErrorMessage', () => {
 
   it('renders retry button when onRetry provided', () => {
     render(<ErrorMessage message="Error" onRetry={() => {}} />)
-    expect(screen.getByRole('button', { name: /retry/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /重試/ })).toBeInTheDocument()
   })
 
   it('does not render retry button when onRetry omitted', () => {
@@ -28,7 +28,7 @@ describe('ErrorMessage', () => {
     const user = userEvent.setup()
     const onRetry = vi.fn()
     render(<ErrorMessage message="Error" onRetry={onRetry} />)
-    await user.click(screen.getByRole('button', { name: /retry/i }))
+    await user.click(screen.getByRole('button', { name: /重試/ }))
     expect(onRetry).toHaveBeenCalledOnce()
   })
 
