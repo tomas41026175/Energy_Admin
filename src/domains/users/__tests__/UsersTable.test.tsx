@@ -90,6 +90,28 @@ describe('UsersTable', () => {
     expect(screen.getAllByText('Bob')[0]).toBeInTheDocument()
   })
 
+  it('renders avatar initials when avatar is empty', () => {
+    mockUseUsers.mockReturnValue(defaultHookResult)
+
+    render(<UsersTable params={{ page: 1, limit: 10 }} onPageChange={vi.fn()} />)
+    // avatar is '' in mock data → fallback span with aria-label=name and initial char
+    expect(screen.getAllByLabelText('Alice').length).toBeGreaterThan(0)
+    expect(screen.getAllByLabelText('Bob').length).toBeGreaterThan(0)
+  })
+
+  it('renders avatar img when avatar URL is provided', () => {
+    mockUseUsers.mockReturnValue({
+      ...defaultHookResult,
+      data: {
+        data: [{ ...mockUsers[0], avatar: 'https://example.com/alice.png' }],
+        pagination: mockPagination,
+      },
+    } as unknown as ReturnType<typeof useUsers>)
+
+    render(<UsersTable params={{ page: 1, limit: 10 }} onPageChange={vi.fn()} />)
+    expect(screen.getAllByRole('img', { name: 'Alice' }).length).toBeGreaterThan(0)
+  })
+
   it('shows retry button in error state and calls refetch', () => {
     const refetch = vi.fn()
     mockUseUsers.mockReturnValue({
