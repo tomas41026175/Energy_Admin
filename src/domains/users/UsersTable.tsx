@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useUsers } from './users.hooks'
 import type { User, UsersParams } from './users.types'
 import { cn } from '@/shared/utils/cn'
@@ -96,6 +97,53 @@ export const UsersTable = ({ params, onPageChange }: UsersTableProps) => {
   )
 }
 
+const AVATAR_COLORS = [
+  'bg-blue-500',
+  'bg-green-500',
+  'bg-purple-500',
+  'bg-orange-500',
+  'bg-pink-500',
+  'bg-teal-500',
+] as const
+
+const getAvatarColor = (name: string): string =>
+  AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length]
+
+interface UserAvatarProps {
+  name: string
+  avatar: string
+  size?: 'sm' | 'md'
+}
+
+const UserAvatar = ({ name, avatar, size = 'sm' }: UserAvatarProps) => {
+  const [imgError, setImgError] = useState(false)
+  const sizeClasses = size === 'sm' ? 'w-8 h-8 text-xs' : 'w-10 h-10 text-sm'
+
+  if (!avatar || imgError) {
+    return (
+      <span
+        className={cn(
+          'inline-flex items-center justify-center rounded-full text-white font-medium shrink-0',
+          sizeClasses,
+          getAvatarColor(name),
+        )}
+        aria-label={name}
+      >
+        {name.charAt(0).toUpperCase()}
+      </span>
+    )
+  }
+
+  return (
+    <img
+      src={avatar}
+      alt={name}
+      className={cn('rounded-full object-cover shrink-0', sizeClasses)}
+      onError={() => setImgError(true)}
+    />
+  )
+}
+
 interface TableRowProps {
   user: User
 }
@@ -103,7 +151,12 @@ interface TableRowProps {
 const TableRow = ({ user }: TableRowProps) => (
   <tr className="hover:bg-gray-50 transition-colors duration-100">
     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{user.id}</td>
-    <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{user.name}</td>
+    <td className="px-4 py-3 whitespace-nowrap">
+      <div className="flex items-center gap-2.5">
+        <UserAvatar name={user.name} avatar={user.avatar} size="sm" />
+        <span className="text-sm font-medium text-gray-900">{user.name}</span>
+      </div>
+    </td>
     <td className="hidden lg:table-cell px-4 py-3 whitespace-nowrap text-sm text-gray-500">
       {user.email}
     </td>
@@ -123,9 +176,12 @@ interface UserCardProps {
 const UserCard = ({ user }: UserCardProps) => (
   <div className="bg-white rounded-lg border border-gray-200 p-4 space-y-2 animate-fade-in">
     <div className="flex items-start justify-between gap-2">
-      <div>
-        <p className="text-sm font-medium text-gray-900">{user.name}</p>
-        <p className="text-xs text-gray-500 mt-0.5">{user.email}</p>
+      <div className="flex items-center gap-3 min-w-0">
+        <UserAvatar name={user.name} avatar={user.avatar} size="md" />
+        <div className="min-w-0">
+          <p className="text-sm font-medium text-gray-900 truncate">{user.name}</p>
+          <p className="text-xs text-gray-500 mt-0.5 truncate">{user.email}</p>
+        </div>
       </div>
       <StatusBadge status={user.status} />
     </div>
