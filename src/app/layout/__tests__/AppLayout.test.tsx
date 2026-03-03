@@ -32,6 +32,9 @@ const renderAppLayout = () =>
 describe('AppLayout', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    // Default: online
+    vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(true)
+
     mockUseAuthStore.mockImplementation((selector) =>
       selector({
         login: vi.fn(),
@@ -89,7 +92,30 @@ describe('AppLayout', () => {
     renderAppLayout()
     const hamburger = screen.getByRole('button', { name: /開啟選單/i })
     fireEvent.click(hamburger)
-    // After click, mobile sidebar overlay should appear
     expect(screen.getByRole('button', { name: /關閉選單/i })).toBeInTheDocument()
+  })
+
+  it('does not show offline banner when online', () => {
+    renderAppLayout()
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+
+  it('shows offline banner when offline', () => {
+    vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false)
+    renderAppLayout()
+    expect(screen.getByRole('alert')).toBeInTheDocument()
+    expect(screen.getByText(/目前離線/)).toBeInTheDocument()
+  })
+
+  it('renders sidebar collapse toggle button on desktop', () => {
+    renderAppLayout()
+    expect(screen.getByRole('button', { name: /收合側欄/i })).toBeInTheDocument()
+  })
+
+  it('sidebar collapse toggle changes aria-label', () => {
+    renderAppLayout()
+    const collapseBtn = screen.getByRole('button', { name: /收合側欄/i })
+    fireEvent.click(collapseBtn)
+    expect(screen.getByRole('button', { name: /展開側欄/i })).toBeInTheDocument()
   })
 })

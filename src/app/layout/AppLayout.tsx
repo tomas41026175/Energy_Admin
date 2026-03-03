@@ -2,15 +2,18 @@ import { useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import { useAuthStore } from '@/auth/auth.store'
 import { useToast } from '@/shared/hooks/useToast'
+import { useNetworkStatus } from '@/shared/hooks/useNetworkStatus'
 import { Button } from '@/shared/ui/Button'
 import { Sidebar } from './Sidebar'
 
 export const AppLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 
   const user = useAuthStore((s) => s.user)
   const logout = useAuthStore((s) => s.logout)
   const { addToast } = useToast()
+  const { isOnline } = useNetworkStatus()
 
   const handleLogout = (): void => {
     logout()
@@ -19,9 +22,24 @@ export const AppLayout = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Sidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        collapsed={sidebarCollapsed}
+        onToggleCollapse={() => setSidebarCollapsed((prev) => !prev)}
+      />
 
       <div className="flex flex-col flex-1 min-w-0">
+        {/* Offline Banner */}
+        {!isOnline && (
+          <div
+            role="alert"
+            className="bg-yellow-50 border-b border-yellow-200 text-yellow-800 text-sm text-center py-2 px-4"
+          >
+            ⚠️ 目前離線，顯示的資料可能不是最新
+          </div>
+        )}
+
         <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 lg:px-6 shrink-0 sticky top-0 z-10">
           {/* Hamburger (mobile only) */}
           <button

@@ -21,6 +21,7 @@
   - Token 儲存與刷新策略
   - Domain-based 專案結構設計
   - 錯誤處理策略
+  - UX 優化決策（URL Query Params / Client-side Sort / Recharts / Prefetch / Sidebar 收合）
   - 替代方案比較與影響分析
   - 未來可能的調整方向
 

@@ -1,8 +1,10 @@
-import { useState } from 'react'
+import { useCallback, useMemo, useRef } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { UsersTable } from '@/domains/users/UsersTable'
 import { Input } from '@/shared/ui/Input'
 import { useDebounce } from '@/shared/hooks/useDebounce'
-import { DEBOUNCE_DELAY } from '@/shared/constants'
+import { useKeyboard } from '@/shared/hooks/useKeyboard'
+import { DEBOUNCE_DELAY, PAGE_SIZE_OPTIONS } from '@/shared/constants'
 import type { UserStatus } from '@/domains/users/users.types'
 
 const STATUS_OPTIONS: { value: UserStatus | ''; label: string }[] = [
@@ -12,9 +14,14 @@ const STATUS_OPTIONS: { value: UserStatus | ''; label: string }[] = [
 ]
 
 const UsersPage = () => {
-  const [page, setPage] = useState(1)
-  const [searchInput, setSearchInput] = useState('')
-  const [statusFilter, setStatusFilter] = useState<UserStatus | ''>('')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const searchInputRef = useRef<HTMLInputElement>(null)
+
+  // URL as single source of truth
+  const searchInput = searchParams.get('q') ?? ''
+  const statusFilter = (searchParams.get('status') ?? '') as UserStatus | ''
+  const page = Number(searchParams.get('page') ?? '1')
+  const limit = Number(searchParams.get('limit') ?? '10') as typeof PAGE_SIZE_OPTIONS[number]
 
   const debouncedSearch = useDebounce(searchInput, DEBOUNCE_DELAY)
 
@@ -22,25 +29,92 @@ const UsersPage = () => {
   const isEmailSearch = debouncedSearch.includes('@')
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    setSearchInput(e.target.value)
-    setPage(1)
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev)
+        if (e.target.value) next.set('q', e.target.value)
+        else next.delete('q')
+        next.delete('page')
+        return next
+      },
+      { replace: true },
+    )
   }
+
+  const handleClearSearch = useCallback((): void => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev)
+        next.delete('q')
+        next.delete('page')
+        return next
+      },
+      { replace: true },
+    )
+    searchInputRef.current?.focus()
+  }, [setSearchParams])
 
   const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
-    setStatusFilter(e.target.value as UserStatus | '')
-    setPage(1)
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev)
+        if (e.target.value) next.set('status', e.target.value)
+        else next.delete('status')
+        next.delete('page')
+        return next
+      },
+      { replace: true },
+    )
   }
 
-  const tableParams = {
-    page,
-    limit: 10,
-    ...(debouncedSearch
-      ? isEmailSearch
-        ? { email: debouncedSearch }
-        : { name: debouncedSearch }
-      : {}),
-    ...(statusFilter ? { status: statusFilter } : {}),
+  const handlePageChange = (newPage: number): void => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev)
+        next.set('page', String(newPage))
+        return next
+      },
+      { replace: true },
+    )
   }
+
+  const handleLimitChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev)
+        next.set('limit', e.target.value)
+        next.delete('page')
+        return next
+      },
+      { replace: true },
+    )
+  }
+
+  // Keyboard shortcut: / to focus search, Esc to clear
+  const handleSlash = useCallback((): void => {
+    searchInputRef.current?.focus()
+  }, [])
+
+  const handleEscape = useCallback((): void => {
+    if (searchInput) handleClearSearch()
+  }, [searchInput, handleClearSearch])
+
+  useKeyboard('/', handleSlash)
+  useKeyboard('Escape', handleEscape)
+
+  const tableParams = useMemo(
+    () => ({
+      page,
+      limit,
+      ...(debouncedSearch
+        ? isEmailSearch
+          ? { email: debouncedSearch }
+          : { name: debouncedSearch }
+        : {}),
+      ...(statusFilter ? { status: statusFilter } : {}),
+    }),
+    [page, limit, debouncedSearch, isEmailSearch, statusFilter],
+  )
 
   return (
     <>
@@ -56,14 +130,41 @@ const UsersPage = () => {
 
         {/* Search & Filter Bar */}
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
-          <div className="flex-1">
+          {/* Search with clear button */}
+          <div className="flex-1 relative">
             <Input
-              placeholder="搜尋姓名或 Email…"
+              ref={searchInputRef}
+              placeholder="搜尋姓名或 Email… (/ 快捷鍵)"
               value={searchInput}
               onChange={handleSearchChange}
               aria-label="搜尋使用者姓名或 Email"
             />
+            {searchInput && (
+              <button
+                onClick={handleClearSearch}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+                aria-label="清除搜尋"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            )}
           </div>
+
+          {/* Status filter */}
           <div className="relative w-full sm:w-36">
             <select
               value={statusFilter}
@@ -94,9 +195,45 @@ const UsersPage = () => {
               </svg>
             </div>
           </div>
+
+          {/* Page size selector */}
+          <div className="relative w-full sm:w-28">
+            <select
+              value={limit}
+              onChange={handleLimitChange}
+              aria-label="每頁筆數"
+              className="w-full appearance-none px-3 py-2 pr-8 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              {PAGE_SIZE_OPTIONS.map((size) => (
+                <option key={size} value={size}>
+                  {size} 筆/頁
+                </option>
+              ))}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-gray-400">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </div>
+          </div>
         </div>
 
-        <UsersTable params={tableParams} onPageChange={setPage} />
+        <UsersTable
+          params={tableParams}
+          onPageChange={handlePageChange}
+          searchQuery={debouncedSearch}
+        />
       </div>
     </>
   )

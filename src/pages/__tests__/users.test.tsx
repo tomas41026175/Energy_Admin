@@ -1,13 +1,19 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { MemoryRouter } from 'react-router-dom'
 import { ToastProvider } from '@/shared/ui/Toast'
 
 vi.mock('@/shared/hooks/useDebounce', () => ({
   useDebounce: (value: unknown) => value,
 }))
 vi.mock('@/domains/users/UsersTable', () => ({
-  UsersTable: ({ params }: { params: Record<string, unknown> }) => (
-    <div role="region" aria-label="users-table" data-params={JSON.stringify(params)}>
+  UsersTable: ({ params, searchQuery }: { params: Record<string, unknown>; searchQuery?: string }) => (
+    <div
+      role="region"
+      aria-label="users-table"
+      data-params={JSON.stringify(params)}
+      data-search-query={searchQuery ?? ''}
+    >
       UsersTable
     </div>
   ),
@@ -15,11 +21,15 @@ vi.mock('@/domains/users/UsersTable', () => ({
 
 const { default: UsersPage } = await import('../users')
 
-const renderUsers = () =>
+const ROUTER_FUTURE = { v7_startTransition: true, v7_relativeSplatPath: true }
+
+const renderUsers = (initialSearch = '') =>
   render(
-    <ToastProvider>
-      <UsersPage />
-    </ToastProvider>,
+    <MemoryRouter future={ROUTER_FUTURE} initialEntries={[`/users${initialSearch}`]}>
+      <ToastProvider>
+        <UsersPage />
+      </ToastProvider>
+    </MemoryRouter>,
   )
 
 const getTable = () => {
@@ -52,6 +62,11 @@ describe('UsersPage', () => {
     expect(screen.getByRole('combobox', { name: /狀態篩選/i })).toBeInTheDocument()
   })
 
+  it('renders page size select', () => {
+    renderUsers()
+    expect(screen.getByRole('combobox', { name: /每頁筆數/i })).toBeInTheDocument()
+  })
+
   it('renders UsersTable component', () => {
     renderUsers()
     expect(screen.getByRole('region', { name: 'users-table' })).toBeInTheDocument()
@@ -60,6 +75,11 @@ describe('UsersPage', () => {
   it('passes initial page=1 to UsersTable', () => {
     renderUsers()
     expect(getTable().page).toBe(1)
+  })
+
+  it('passes default limit=10 to UsersTable', () => {
+    renderUsers()
+    expect(getTable().limit).toBe(10)
   })
 
   it('routes to name param when input has no @', () => {
@@ -103,5 +123,42 @@ describe('UsersPage', () => {
     const params = getTable()
     expect(params.name).toBeUndefined()
     expect(params.email).toBeUndefined()
+  })
+
+  it('shows clear button when search input has value', () => {
+    renderUsers()
+    const input = screen.getByRole('textbox', { name: /搜尋使用者/i })
+    fireEvent.change(input, { target: { value: 'alice' } })
+    expect(screen.getByRole('button', { name: /清除搜尋/i })).toBeInTheDocument()
+  })
+
+  it('does not show clear button when search is empty', () => {
+    renderUsers()
+    expect(screen.queryByRole('button', { name: /清除搜尋/i })).not.toBeInTheDocument()
+  })
+
+  it('clears search input when clear button is clicked', () => {
+    renderUsers()
+    const input = screen.getByRole('textbox', { name: /搜尋使用者/i })
+    fireEvent.change(input, { target: { value: 'alice' } })
+    fireEvent.click(screen.getByRole('button', { name: /清除搜尋/i }))
+    expect((input as HTMLInputElement).value).toBe('')
+  })
+
+  it('changes page size when limit select changes', () => {
+    renderUsers()
+    fireEvent.change(screen.getByRole('combobox', { name: /每頁筆數/i }), {
+      target: { value: '25' },
+    })
+    expect(getTable().limit).toBe(25)
+  })
+
+  it('passes searchQuery prop to UsersTable', () => {
+    renderUsers()
+    fireEvent.change(screen.getByRole('textbox', { name: /搜尋使用者/i }), {
+      target: { value: 'test' },
+    })
+    const el = screen.getByRole('region', { name: 'users-table' })
+    expect((el as HTMLElement).dataset.searchQuery).toBe('test')
   })
 })
