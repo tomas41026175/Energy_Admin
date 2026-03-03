@@ -4,6 +4,14 @@
 
 ---
 
+## 🌐 線上展示
+
+**[https://energy-admin-one.vercel.app/login](https://energy-admin-one.vercel.app/login)**
+
+測試帳號：`admin` / `password123`
+
+---
+
 ## 🚀 專案概覽
 
 本專案為一個簡易後台管理系統，旨在展示**真實世界前端系統**應如何結構化與擴展。
@@ -91,13 +99,10 @@ src/
 
 ## 🔧 環境變數
 
-複製 `.env.example` 為 `.env`：
-```bash
-cp .env.example .env
-```
+建立 `.env` 並設定以下變數：
 
-| 變數名稱 | 說明 | 範例值 |
-|---------|------|--------|
+| 變數名稱 | 說明 | 值 |
+|---------|------|-----|
 | `VITE_API_BASE_URL` | API Base URL | `https://lbbj5pioquwxdexqmcnwaxrpce0lcoqx.lambda-url.ap-southeast-1.on.aws` |
 
 ---
@@ -113,7 +118,7 @@ password: password123
 ### 開發伺服器
 ```bash
 npm install
-cp .env.example .env
+# 建立 .env 並填入 VITE_API_BASE_URL
 npm run dev
 ```
 
@@ -195,14 +200,27 @@ npm run preview
 
 ## 🚢 部署（Vercel）
 
+**Production**：[https://energy-admin-one.vercel.app](https://energy-admin-one.vercel.app)
+
+### 設定步驟
+
 1. 在 Vercel Dashboard 匯入 GitHub Repository
 2. Framework Preset: **Vite**
 3. Build Command: `npm run build`
 4. Output Directory: `dist`
 5. 設定環境變數：`VITE_API_BASE_URL`
-6. Push to `main` 觸發 Production 部署，開 PR 觸發 Preview 部署
 
-CI/CD 由 GitHub Actions 自動執行 lint、type-check、test、build。
+### CI/CD 流程
+
+```
+PR 開啟 → GitHub Actions CI
+  ├── TypeScript check
+  ├── ESLint
+  ├── Vitest + coverage
+  └── Vite build
+         ↓ 全過才能 merge
+merge to main → Vercel 自動 deploy
+```
 
 ---
 
