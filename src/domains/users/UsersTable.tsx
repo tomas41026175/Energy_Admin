@@ -12,6 +12,19 @@ interface UsersTableProps {
   onPageChange: (page: number) => void
 }
 
+const formatDateUTC8 = (dateStr: string): string => {
+  const date = new Date(dateStr)
+  if (isNaN(date.getTime())) return dateStr
+  const isDateOnly = /^\d{4}-\d{2}-\d{2}$/.test(dateStr)
+  return new Intl.DateTimeFormat('zh-TW', {
+    timeZone: 'Asia/Taipei',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    ...(isDateOnly ? {} : { hour: '2-digit', minute: '2-digit' }),
+  }).format(date)
+}
+
 export const UsersTable = ({ params, onPageChange }: UsersTableProps) => {
   const { data, isLoading, isError, error, refetch, isPlaceholderData } = useUsers(params)
 
@@ -118,7 +131,7 @@ const TableRow = ({ user }: TableRowProps) => (
       <StatusBadge status={user.status} />
     </td>
     <td className="hidden lg:table-cell px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-      {user.created_at}
+      {formatDateUTC8(user.created_at)}
     </td>
   </tr>
 )
@@ -128,21 +141,19 @@ interface UserCardProps {
 }
 
 const UserCard = ({ user }: UserCardProps) => (
-  <div className="bg-white rounded-lg border border-gray-200 p-4 space-y-2 animate-fade-in">
+  <div className="bg-white rounded-lg border border-gray-200 p-4 animate-fade-in">
     <div className="flex items-start justify-between gap-2">
       <div className="flex items-center gap-3 min-w-0">
         <UserAvatar name={user.name} avatar={user.avatar} size="lg" />
         <div className="min-w-0">
           <p className="text-sm font-medium text-gray-900 truncate">{user.name}</p>
           <p className="text-xs text-gray-500 mt-0.5 truncate">{user.email}</p>
+          <p className="text-xs text-gray-400 mt-0.5">ID: {user.id}</p>
         </div>
       </div>
       <StatusBadge status={user.status} />
     </div>
-    <div className="flex items-center justify-between text-xs text-gray-400">
-      <span>ID: {user.id}</span>
-      <span>{user.created_at}</span>
-    </div>
+    <p className="text-xs text-gray-400 mt-2 text-right">{formatDateUTC8(user.created_at)}</p>
   </div>
 )
 
@@ -176,6 +187,32 @@ interface PaginationProps {
   onPageChange: (page: number) => void
 }
 
+const CHEVRON_POINTS = {
+  left: '15 18 9 12 15 6',
+  right: '9 18 15 12 9 6',
+} as const
+
+interface ChevronIconProps {
+  direction: keyof typeof CHEVRON_POINTS
+}
+
+const ChevronIcon = ({ direction }: ChevronIconProps) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <polyline points={CHEVRON_POINTS[direction]} />
+  </svg>
+)
+
 const Pagination = ({ currentPage, totalPages, onPageChange }: PaginationProps) => {
   if (totalPages <= 1) return null
 
@@ -187,8 +224,9 @@ const Pagination = ({ currentPage, totalPages, onPageChange }: PaginationProps) 
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage <= 1}
         aria-label="前往上一頁"
+        className="px-2"
       >
-        上一頁
+        <ChevronIcon direction="left" />
       </Button>
 
       {getPageWindow(currentPage, totalPages).map((page, idx) => (
@@ -218,8 +256,9 @@ const Pagination = ({ currentPage, totalPages, onPageChange }: PaginationProps) 
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage >= totalPages}
         aria-label="前往下一頁"
+        className="px-2"
       >
-        下一頁
+        <ChevronIcon direction="right" />
       </Button>
     </nav>
   )

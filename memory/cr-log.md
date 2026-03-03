@@ -130,3 +130,170 @@
 - **結論：Approved ✅**
 
 ---
+
+## [2026-03-03 15:06] CR #8 — users 篩選強化 + 手機版修復
+
+**審查範圍:** 未 commit 工作目錄變更（6 個檔案）
+**分支:** main（local 工作目錄）
+
+### 變更清單
+- `src/domains/users/users.types.ts` — 新增 `id / createdFrom / createdTo` 至 `UsersParams`
+- `src/shared/mocks/handlers.ts` — 靜態 → 動態篩選 MSW，資料擴充至 15 筆
+- `src/pages/__tests__/users.test.tsx` — 新增 11 個篩選測試（email/id/日期/page reset）
+- `src/pages/users.tsx` — 兩列篩選 UI（email/id/date range）+ select appearance-none
+- `src/domains/users/UsersTable.tsx` — 分頁改 icon、UserCard ID 移至 email 下方、`formatDateUTC8` UTC+8 轉換
+- `src/domains/users/__tests__/UsersTable.test.tsx` — 新增 3 個 `formatDateUTC8` 驗證測試
+
+### Learnings 命中
+無（本次無歷史錯誤模式命中）
+
+### 發現問題
+| # | 等級 | 面向 | 檔案:行號 | 問題描述 |
+|---|------|------|----------|---------|
+| 1 | 🟡 | 測試覆蓋 | `UsersTable.tsx:15-27` | `formatDateUTC8` 無驗證性測試 — date-only / ISO+timezone / invalid date 三個 branch 未 assert 輸出 → **已修正** |
+| 2 | 🟢 | 可維護性 | `users.tsx:33-63` | 6 個 handler 結構相同，可用工廠函式消除重複 |
+| 3 | 🟢 | 可維護性 | `UsersTable.tsx:187-224` | `ChevronLeft`/`ChevronRight` SVG 幾乎相同，可合併為帶 `direction` prop 的單一組件 |
+| 4 | 🟢 | Type Safety | `handlers.ts:5` | `MOCK_USERS` 未標注型別，`status` 推斷為 `string` 而非 `UserStatus` |
+
+### 統計
+- 🔴 Critical: 0 個
+- 🟠 Domain Issue: 0 個
+- 🟡 Warning: 1 個（已修正）
+- 🟢 Info: 3 個
+- Learnings 命中: 0 個
+
+### 例外清單
+| # | 等級 | 面向 | 檔案:行號 | 例外理由 |
+|---|------|------|----------|---------|
+| 2 | 🟢 | 可維護性 | `users.tsx:33-63` | 6 個 handler 各 3 行且命名清晰，工廠函式增加間接層降低可讀性；可讀性優先 |
+| 3 | 🟢 | 可維護性 | `UsersTable.tsx:187-224` | 兩個 SVG 各 12 行，合併會增加 `direction` prop 複雜度；目前可讀性良好 |
+| 4 | 🟢 | Type Safety | `handlers.ts:5` | `MOCK_USERS` 為 test-only mock，型別推斷可接受；不影響生產代碼型別安全 |
+
+### 測試結果（修正後）
+- Test Files: 27 passed
+- Tests: 224 passed（新增 14 個測試）
+- formatDateUTC8 覆蓋：date-only / ISO+Z / invalid 三個 branch ✅
+
+### 8 面向檢查表
+- TypeScript 型別安全：✅
+- 效能問題：✅（formatDateUTC8 per-render 計算，最多 10 筆可接受）
+- 安全性：✅
+- 可維護性：✅（例外標注）
+- i18n：✅（zh-TW hardcode，單語專案）
+- 狀態管理：✅（無 Zustand 相關）
+- React 最佳實踐：✅（無 useEffect，aria-hidden 正確）
+- 測試覆蓋：✅（修正後）
+
+### 修正狀態: ✅ Approved（使用者要求全修）
+
+### Re-review（2026-03-03 15:15）
+
+| # | 等級 | 問題 | 狀態 |
+|---|------|------|------|
+| 1 | 🟡 | `formatDateUTC8` 無驗證測試 | ✅ 補 3 個測試（date-only/ISO+Z/invalid） |
+| 2 | 🟢 | 6 個 handler 重複模式 | ✅ 提取 `makeInputHandler` 工廠函式，5 個 input handler 複用 |
+| 3 | 🟢 | ChevronLeft/Right 重複 SVG | ✅ 合併為 `ChevronIcon` + `CHEVRON_POINTS` 常數表 |
+| 4 | 🟢 | MOCK_USERS 未標注型別 | ✅ import `User` 並標注 `MOCK_USERS: User[]` |
+
+**最終結論：Approved ✅ — 所有 4 個問題全數修正**
+
+---
+
+## [2026-03-03 11:51] CR #7 — fix/layout-whitespace
+
+**審查範圍:** 佈局 CSS 修正（sticky header + sidebar + min-h-screen）
+**Commit:** 待提交
+**分支:** fix/layout-whitespace
+
+### 變更清單
+- `src/app/layout/AppLayout.tsx` — 3 行 CSS class 改動
+  - 第 21 行：`h-screen` → `min-h-screen`
+  - 第 25 行：header 加 `sticky top-0 z-10`
+  - 第 48 行：main 移除 `overflow-y-auto`
+- `src/app/layout/Sidebar.tsx` — 1 行 CSS class 改動
+  - 第 101 行：desktop aside 加 `sticky top-0 h-screen`
+
+### 變更分析
+
+#### AppLayout 修正邏輯
+1. **容器高度** (`min-h-screen`)
+   - 原始 `h-screen`：固定視口高度，內容超高時被切割
+   - 修正 `min-h-screen`：最低視口高度，內容超高時自然延伸
+   - **效果**：解決內容溢出問題
+
+2. **Header 固定** (`sticky top-0 z-10`)
+   - 視口滾動時保持頂部可見
+   - z-10 層級 < 手機版 sidebar z-40，不衝突
+   - **效果**：改善可用性，方便存取登出
+
+3. **Main 滾動邏輯** (移除 `overflow-y-auto`)
+   - 由 AppLayout 外層 `flex min-h-screen` 統一控制滾動
+   - 避免嵌套滾動容器
+   - **效果**：簡化 CSS 邏輯，依賴父容器自然流
+
+#### Sidebar 修正邏輯
+1. **桌面版固定** (`sticky top-0 h-screen`)
+   - 側邊欄跟隨 viewport 滾動時固定在頂部
+   - `h-screen` 限制高度為視口高度，防止超溢
+   - **效果**：固定導覽欄位，提升可用性
+
+2. **手機版 overlay** (分離控制)
+   - 手機版 `fixed inset-0 z-40`（第 107 行）
+   - 與桌面版 sticky 邏輯完全分離
+   - **效果**：響應式層級正確，無衝突
+
+### 發現問題
+| # | 等級 | 面向 | 檔案:行號 | 問題描述 |
+|---|------|------|----------|---------|
+| 無 Critical / Warning / Info 問題 | | | | |
+
+### z-index 層級驗證
+- `body`：0
+- header：10 ✅
+- 手機 sidebar backdrop/drawer：40 ✅
+- header < mobile overlay，層級正確
+
+### 瀏覽器相容性
+- `sticky position`：IE11 不支援，Edge 12+、Chrome 56+ 支援 ✅
+- 適用專案技術棧（React 18 + 現代瀏覽器）✅
+- `min-height`：所有瀏覽器支援 ✅
+
+### 測試驗證
+```
+✓ src/app/layout/__tests__/AppLayout.test.tsx (8 tests) 87ms
+  - renders Outlet (main content area)
+  - displays user.username in header
+  - renders logout button
+  - calls logout when logout button is clicked
+  - shows toast after logout
+  - renders sidebar with navigation links
+  - shows hamburger menu button on mobile
+  - hamburger button toggles sidebar visibility
+```
+**測試結果：全數通過 ✅**
+
+### 8 面向檢查表
+- TypeScript 型別安全：✅ 無型別變更
+- 效能問題：✅ sticky/h-screen 無效能損失
+- 安全性：✅ 純 CSS 改動
+- 可維護性：✅ 邏輯清晰，註解完善
+- i18n：✅ 無新增字串
+- Jotai 狀態：N/A 專案使用 Zustand
+- React 最佳實踐：✅ 無 Hook 改變
+- 測試覆蓋：✅ 全數通過
+
+### 統計
+- 🔴 Critical: 0 個
+- 🟡 Warning: 0 個
+- 🟢 Info: 0 個
+- Learnings 命中: 0 個
+- 異常處理: 0 個
+
+### 修正狀態: ✅ Approved（無需修正）
+
+**結論**：
+高品質的 CSS 修正，邏輯清晰、層級正確、測試完善。
+✅ 可直接 merge
+
+---
+
