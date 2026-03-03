@@ -1,8 +1,9 @@
 import { useUsers } from '@/domains/users/users.hooks'
 import { Skeleton } from '@/shared/ui/Skeleton'
+import { ErrorMessage } from '@/shared/ui/ErrorMessage'
+import { UserAvatar } from '@/shared/components/UserAvatar'
 import { cn } from '@/shared/utils/cn'
 import type { User } from '@/domains/users/users.types'
-import { useState } from 'react'
 
 // --- Stat Card ---
 
@@ -10,13 +11,16 @@ interface StatCardProps {
   label: string
   value: number | undefined
   isLoading: boolean
+  isError: boolean
   colorClass: string
 }
 
-const StatCard = ({ label, value, isLoading, colorClass }: StatCardProps) => (
+const StatCard = ({ label, value, isLoading, isError, colorClass }: StatCardProps) => (
   <div className="bg-white rounded-xl border border-gray-200 p-6 flex flex-col gap-2">
     {isLoading ? (
       <Skeleton variant="rectangular" height={96} />
+    ) : isError ? (
+      <span className="text-sm text-red-500">載入失敗</span>
     ) : (
       <>
         <span className="text-sm font-medium text-gray-500">{label}</span>
@@ -25,52 +29,6 @@ const StatCard = ({ label, value, isLoading, colorClass }: StatCardProps) => (
     )}
   </div>
 )
-
-// --- User Avatar (reuse pattern from UsersTable) ---
-
-const AVATAR_COLORS = [
-  'bg-blue-500',
-  'bg-green-500',
-  'bg-purple-500',
-  'bg-orange-500',
-  'bg-pink-500',
-  'bg-teal-500',
-] as const
-
-const getAvatarColor = (name: string): string =>
-  AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length]
-
-interface UserAvatarProps {
-  name: string
-  avatar: string
-}
-
-const UserAvatar = ({ name, avatar }: UserAvatarProps) => {
-  const [imgError, setImgError] = useState(false)
-
-  if (!avatar || imgError) {
-    return (
-      <span
-        className={cn(
-          'inline-flex items-center justify-center w-9 h-9 rounded-full text-white text-sm font-medium shrink-0',
-          getAvatarColor(name),
-        )}
-        aria-label={name}
-      >
-        {name.charAt(0).toUpperCase()}
-      </span>
-    )
-  }
-
-  return (
-    <img
-      src={avatar}
-      alt={name}
-      className="w-9 h-9 rounded-full object-cover shrink-0"
-      onError={() => setImgError(true)}
-    />
-  )
-}
 
 // --- Status Badge ---
 
@@ -93,7 +51,7 @@ const StatusBadge = ({ status }: StatusBadgeProps) => (
 
 const RecentUserRow = ({ user }: { user: User }) => (
   <div className="flex items-center gap-3 py-3 border-b border-gray-100 last:border-b-0">
-    <UserAvatar name={user.name} avatar={user.avatar} />
+    <UserAvatar name={user.name} avatar={user.avatar} size="md" />
     <div className="flex-1 min-w-0">
       <p className="text-sm font-medium text-gray-900 truncate">{user.name}</p>
       <p className="text-xs text-gray-500 truncate">{user.email}</p>
@@ -104,6 +62,9 @@ const RecentUserRow = ({ user }: { user: User }) => (
 
 // --- Dashboard Page ---
 
+// Note: 4 separate useUsers() calls are intentional — each fetches a distinct dataset
+// (total / active / inactive / recent-5). TanStack Query caches by queryKey with
+// staleTime=30s, preventing unnecessary refetches.
 const DashboardPage = () => {
   const totalQuery = useUsers({})
   const activeQuery = useUsers({ status: 'active' })
@@ -122,18 +83,21 @@ const DashboardPage = () => {
           label="總使用者"
           value={totalQuery.data?.pagination.total}
           isLoading={statsLoading}
+          isError={totalQuery.isError}
           colorClass="text-blue-600"
         />
         <StatCard
           label="活躍"
           value={activeQuery.data?.pagination.total}
           isLoading={statsLoading}
+          isError={activeQuery.isError}
           colorClass="text-green-600"
         />
         <StatCard
           label="停用"
           value={inactiveQuery.data?.pagination.total}
           isLoading={statsLoading}
+          isError={inactiveQuery.isError}
           colorClass="text-gray-600"
         />
       </div>
@@ -148,6 +112,11 @@ const DashboardPage = () => {
               <Skeleton key={i} variant="rectangular" height={52} />
             ))}
           </div>
+        ) : recentQuery.isError ? (
+          <ErrorMessage
+            message={recentQuery.error?.message ?? '載入使用者失敗'}
+            onRetry={() => void recentQuery.refetch()}
+          />
         ) : (
           <div>
             {(recentQuery.data?.data ?? []).map((user) => (
