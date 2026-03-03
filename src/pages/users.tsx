@@ -1,9 +1,6 @@
 import { useState } from 'react'
 import { UsersTable } from '@/domains/users/UsersTable'
-import { useAuthStore } from '@/auth/auth.store'
-import { Button } from '@/shared/ui/Button'
 import { Input } from '@/shared/ui/Input'
-import { useToast } from '@/shared/hooks/useToast'
 import { useDebounce } from '@/shared/hooks/useDebounce'
 import type { UserStatus } from '@/domains/users/users.types'
 
@@ -18,16 +15,7 @@ const UsersPage = () => {
   const [searchInput, setSearchInput] = useState('')
   const [statusFilter, setStatusFilter] = useState<UserStatus | ''>('')
 
-  const logout = useAuthStore((s) => s.logout)
-  const user = useAuthStore((s) => s.user)
-  const { addToast } = useToast()
-
   const debouncedSearch = useDebounce(searchInput, 400)
-
-  const handleLogout = (): void => {
-    logout()
-    addToast('info', '您已登出。')
-  }
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setSearchInput(e.target.value)
@@ -55,50 +43,36 @@ const UsersPage = () => {
         跳至主要內容
       </a>
 
-      <div className="min-h-screen bg-gray-50">
-        <header className="bg-white shadow-sm">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-            <h1 className="text-xl font-semibold text-gray-900">使用者管理</h1>
-            <div className="flex items-center gap-3 sm:gap-4">
-              {user && (
-                <span className="hidden sm:inline text-sm text-gray-600">{user.username}</span>
-              )}
-              <Button variant="danger" size="sm" onClick={handleLogout}>
-                登出
-              </Button>
-            </div>
-          </div>
-        </header>
+      <div id="main-content">
+        <h1 className="text-2xl font-semibold text-gray-900 mb-6">使用者管理</h1>
 
-        <main id="main-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-          {/* Search & Filter Bar */}
-          <div className="flex flex-col sm:flex-row gap-3 mb-6">
-            <div className="flex-1">
-              <Input
-                placeholder="搜尋姓名…"
-                value={searchInput}
-                onChange={handleSearchChange}
-                aria-label="依姓名搜尋使用者"
-              />
-            </div>
-            <div className="sm:w-40">
-              <select
-                value={statusFilter}
-                onChange={handleStatusChange}
-                aria-label="依狀態篩選"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                {STATUS_OPTIONS.map(({ value, label }) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </div>
+        {/* Search & Filter Bar */}
+        <div className="flex flex-col sm:flex-row gap-3 mb-6">
+          <div className="flex-1">
+            <Input
+              placeholder="搜尋姓名…"
+              value={searchInput}
+              onChange={handleSearchChange}
+              aria-label="依姓名搜尋使用者"
+            />
           </div>
+          <div className="sm:w-40">
+            <select
+              value={statusFilter}
+              onChange={handleStatusChange}
+              aria-label="依狀態篩選"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              {STATUS_OPTIONS.map(({ value, label }) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
 
-          <UsersTable params={tableParams} onPageChange={setPage} />
-        </main>
+        <UsersTable params={tableParams} onPageChange={setPage} />
       </div>
     </>
   )

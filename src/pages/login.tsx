@@ -25,7 +25,7 @@ const LoginPage = () => {
     setSubmitError(null)
     try {
       await login(data)
-      navigate('/users', { replace: true })
+      navigate('/dashboard', { replace: true })
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : '登入失敗')
     }

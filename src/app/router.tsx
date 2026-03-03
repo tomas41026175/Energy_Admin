@@ -1,9 +1,11 @@
 import { lazy, Suspense } from 'react'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { AuthGuard } from '@/auth/auth.guard'
+import { AppLayout } from '@/app/layout/AppLayout'
 import { Spinner } from '@/shared/ui/Spinner'
 
 const LoginPage = lazy(() => import('@/pages/login'))
+const DashboardPage = lazy(() => import('@/pages/dashboard'))
 const UsersPage = lazy(() => import('@/pages/users'))
 
 const suspenseFallback = (
@@ -25,15 +27,28 @@ export const router = createBrowserRouter([
     element: <AuthGuard />,
     children: [
       {
-        path: '/users',
-        element: (
-          <Suspense fallback={suspenseFallback}>
-            <UsersPage />
-          </Suspense>
-        ),
+        element: <AppLayout />,
+        children: [
+          {
+            path: '/dashboard',
+            element: (
+              <Suspense fallback={suspenseFallback}>
+                <DashboardPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: '/users',
+            element: (
+              <Suspense fallback={suspenseFallback}>
+                <UsersPage />
+              </Suspense>
+            ),
+          },
+          // Authenticated users hitting unknown paths → /dashboard
+          { path: '*', element: <Navigate to="/dashboard" replace /> },
+        ],
       },
-      // Authenticated users hitting unknown paths → /users
-      { path: '*', element: <Navigate to="/users" replace /> },
     ],
   },
   {

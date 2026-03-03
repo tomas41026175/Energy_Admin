@@ -86,7 +86,7 @@ describe('LoginPage', () => {
 
     await waitFor(() => {
       expect(mockLogin).toHaveBeenCalledWith({ username: 'admin', password: 'password123' })
-      expect(mockNavigate).toHaveBeenCalledWith('/users', { replace: true })
+      expect(mockNavigate).toHaveBeenCalledWith('/dashboard', { replace: true })
     })
   })
 
