@@ -45,7 +45,7 @@ describe('UsersPage', () => {
 
   it('renders page heading', () => {
     renderUsers()
-    expect(screen.getByRole('heading', { name: /users/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /使用者管理/i })).toBeInTheDocument()
   })
 
   it('renders user username in header', () => {
@@ -55,22 +55,22 @@ describe('UsersPage', () => {
 
   it('renders logout button', () => {
     renderUsers()
-    expect(screen.getByRole('button', { name: /logout/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /登出/i })).toBeInTheDocument()
   })
 
   it('renders skip to main content link', () => {
     renderUsers()
-    expect(screen.getByText('Skip to main content')).toBeInTheDocument()
+    expect(screen.getByText('跳至主要內容')).toBeInTheDocument()
   })
 
   it('renders search input', () => {
     renderUsers()
-    expect(screen.getByRole('textbox', { name: /search/i })).toBeInTheDocument()
+    expect(screen.getByRole('textbox', { name: /搜尋/i })).toBeInTheDocument()
   })
 
   it('renders status filter select', () => {
     renderUsers()
-    expect(screen.getByRole('combobox', { name: /filter by status/i })).toBeInTheDocument()
+    expect(screen.getByRole('combobox', { name: /狀態篩選/i })).toBeInTheDocument()
   })
 
   it('renders UsersTable component', () => {
@@ -80,15 +80,15 @@ describe('UsersPage', () => {
 
   it('calls logout when logout button clicked', () => {
     renderUsers()
-    fireEvent.click(screen.getByRole('button', { name: /logout/i }))
+    fireEvent.click(screen.getByRole('button', { name: /登出/i }))
     expect(mockLogout).toHaveBeenCalledOnce()
   })
 
   it('shows toast notification after logout', async () => {
     renderUsers()
-    fireEvent.click(screen.getByRole('button', { name: /logout/i }))
+    fireEvent.click(screen.getByRole('button', { name: /登出/i }))
     await waitFor(() => {
-      expect(screen.getByText('You have been signed out.')).toBeInTheDocument()
+      expect(screen.getByText('您已登出。')).toBeInTheDocument()
     })
   })
 
@@ -101,7 +101,7 @@ describe('UsersPage', () => {
 
   it('passes name filter when search input changes', () => {
     renderUsers()
-    const searchInput = screen.getByRole('textbox', { name: /search/i })
+    const searchInput = screen.getByRole('textbox', { name: /搜尋/i })
     fireEvent.change(searchInput, { target: { value: 'alice' } })
     expect(searchInput).toHaveValue('alice')
     // useDebounce is mocked to return value immediately
@@ -113,7 +113,7 @@ describe('UsersPage', () => {
 
   it('passes status filter when select changes', () => {
     renderUsers()
-    const select = screen.getByRole('combobox', { name: /filter by status/i })
+    const select = screen.getByRole('combobox', { name: /狀態篩選/i })
     fireEvent.change(select, { target: { value: 'active' } })
     expect(select).toHaveValue('active')
   })

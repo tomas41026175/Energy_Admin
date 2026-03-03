@@ -49,18 +49,18 @@ describe('LoginPage', () => {
 
   it('renders username and password fields', () => {
     renderLogin()
-    expect(screen.getByLabelText(/username/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/password/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/帳號/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/密碼/i)).toBeInTheDocument()
   })
 
   it('renders sign in button', () => {
     renderLogin()
-    expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /登入/i })).toBeInTheDocument()
   })
 
   it('renders skip to main content link', () => {
     renderLogin()
-    expect(screen.getByText('Skip to main content')).toBeInTheDocument()
+    expect(screen.getByText('跳至主要內容')).toBeInTheDocument()
   })
 
   it('renders page heading', () => {
@@ -70,7 +70,7 @@ describe('LoginPage', () => {
 
   it('shows validation errors on empty submit', async () => {
     renderLogin()
-    fireEvent.click(screen.getByRole('button', { name: /sign in/i }))
+    fireEvent.click(screen.getByRole('button', { name: /登入/i }))
     await waitFor(() => {
       expect(screen.getAllByRole('alert').length).toBeGreaterThan(0)
     })
@@ -80,9 +80,9 @@ describe('LoginPage', () => {
     mockLogin.mockResolvedValueOnce(undefined)
     renderLogin()
 
-    fireEvent.change(screen.getByLabelText(/username/i), { target: { value: 'admin' } })
-    fireEvent.change(screen.getByLabelText(/password/i), { target: { value: 'password123' } })
-    fireEvent.click(screen.getByRole('button', { name: /sign in/i }))
+    fireEvent.change(screen.getByLabelText(/帳號/i), { target: { value: 'admin' } })
+    fireEvent.change(screen.getByLabelText(/密碼/i), { target: { value: 'password123' } })
+    fireEvent.click(screen.getByRole('button', { name: /登入/i }))
 
     await waitFor(() => {
       expect(mockLogin).toHaveBeenCalledWith({ username: 'admin', password: 'password123' })
@@ -94,9 +94,9 @@ describe('LoginPage', () => {
     mockLogin.mockRejectedValueOnce(new Error('Invalid credentials'))
     renderLogin()
 
-    fireEvent.change(screen.getByLabelText(/username/i), { target: { value: 'admin' } })
-    fireEvent.change(screen.getByLabelText(/password/i), { target: { value: 'wrongpass' } })
-    fireEvent.click(screen.getByRole('button', { name: /sign in/i }))
+    fireEvent.change(screen.getByLabelText(/帳號/i), { target: { value: 'admin' } })
+    fireEvent.change(screen.getByLabelText(/密碼/i), { target: { value: 'wrongpass' } })
+    fireEvent.click(screen.getByRole('button', { name: /登入/i }))
 
     await waitFor(() => {
       expect(screen.getByRole('alert')).toHaveTextContent('Invalid credentials')
@@ -107,12 +107,12 @@ describe('LoginPage', () => {
     mockLogin.mockRejectedValueOnce('unknown error')
     renderLogin()
 
-    fireEvent.change(screen.getByLabelText(/username/i), { target: { value: 'admin' } })
-    fireEvent.change(screen.getByLabelText(/password/i), { target: { value: 'password123' } })
-    fireEvent.click(screen.getByRole('button', { name: /sign in/i }))
+    fireEvent.change(screen.getByLabelText(/帳號/i), { target: { value: 'admin' } })
+    fireEvent.change(screen.getByLabelText(/密碼/i), { target: { value: 'password123' } })
+    fireEvent.click(screen.getByRole('button', { name: /登入/i }))
 
     await waitFor(() => {
-      expect(screen.getByRole('alert')).toHaveTextContent('Login failed')
+      expect(screen.getByRole('alert')).toHaveTextContent('登入失敗')
     })
   })
 })

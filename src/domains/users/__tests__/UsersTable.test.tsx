@@ -41,7 +41,7 @@ describe('UsersTable', () => {
     } as unknown as ReturnType<typeof useUsers>)
 
     render(<UsersTable params={{ page: 1, limit: 10 }} onPageChange={vi.fn()} />)
-    expect(screen.getByLabelText('Loading users')).toBeInTheDocument()
+    expect(screen.getByLabelText('載入使用者中')).toBeInTheDocument()
   })
 
   it('shows error message on failure', () => {
@@ -69,7 +69,7 @@ describe('UsersTable', () => {
 
     render(<UsersTable params={{ page: 1, limit: 10 }} onPageChange={vi.fn()} />)
     expect(screen.getByRole('alert')).toBeInTheDocument()
-    expect(screen.getByText('Failed to load users')).toBeInTheDocument()
+    expect(screen.getByText('載入使用者失敗')).toBeInTheDocument()
   })
 
   it('shows empty state when no users', () => {
@@ -79,7 +79,7 @@ describe('UsersTable', () => {
     } as unknown as ReturnType<typeof useUsers>)
 
     render(<UsersTable params={{ page: 1, limit: 10 }} onPageChange={vi.fn()} />)
-    expect(screen.getByText('No users found')).toBeInTheDocument()
+    expect(screen.getByText('找不到使用者')).toBeInTheDocument()
   })
 
   it('renders user data in table', () => {
@@ -108,7 +108,7 @@ describe('UsersTable', () => {
     mockUseUsers.mockReturnValue(defaultHookResult)
 
     render(<UsersTable params={{ page: 1, limit: 10 }} onPageChange={vi.fn()} />)
-    expect(screen.getAllByText('active').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('啟用').length).toBeGreaterThan(0)
   })
 
   it('reduces opacity when isPlaceholderData', () => {
@@ -127,7 +127,7 @@ describe('UsersTable', () => {
     mockUseUsers.mockReturnValue(defaultHookResult)
 
     render(<UsersTable params={{ page: 1, limit: 10 }} onPageChange={vi.fn()} />)
-    expect(screen.queryByRole('navigation', { name: /pagination/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('navigation', { name: /分頁/i })).not.toBeInTheDocument()
   })
 
   it('shows pagination when totalPages > 1', () => {
@@ -140,7 +140,7 @@ describe('UsersTable', () => {
     } as unknown as ReturnType<typeof useUsers>)
 
     render(<UsersTable params={{ page: 1, limit: 10 }} onPageChange={vi.fn()} />)
-    expect(screen.getByRole('navigation', { name: /pagination/i })).toBeInTheDocument()
+    expect(screen.getByRole('navigation', { name: /分頁/i })).toBeInTheDocument()
   })
 
   it('calls onPageChange when Next button clicked', () => {
@@ -154,7 +154,7 @@ describe('UsersTable', () => {
     } as unknown as ReturnType<typeof useUsers>)
 
     render(<UsersTable params={{ page: 1, limit: 10 }} onPageChange={onPageChange} />)
-    fireEvent.click(screen.getByRole('button', { name: /next/i }))
+    fireEvent.click(screen.getByRole('button', { name: /下一頁/i }))
     expect(onPageChange).toHaveBeenCalledWith(2)
   })
 
@@ -168,7 +168,7 @@ describe('UsersTable', () => {
     } as unknown as ReturnType<typeof useUsers>)
 
     render(<UsersTable params={{ page: 1, limit: 10 }} onPageChange={vi.fn()} />)
-    expect(screen.getByRole('button', { name: /previous/i })).toBeDisabled()
+    expect(screen.getByRole('button', { name: /上一頁/i })).toBeDisabled()
   })
 
   it('shows ellipsis for large page count (current near start)', () => {
@@ -182,7 +182,7 @@ describe('UsersTable', () => {
     } as unknown as ReturnType<typeof useUsers>)
 
     render(<UsersTable params={{ page: 2, limit: 10 }} onPageChange={vi.fn()} />)
-    expect(screen.getByRole('navigation', { name: /pagination/i })).toBeInTheDocument()
+    expect(screen.getByRole('navigation', { name: /分頁/i })).toBeInTheDocument()
     // Ellipsis buttons should appear (disabled buttons with '...')
     const ellipsisButtons = screen.getAllByRole('button').filter(
       (btn) => btn.textContent === '...',
@@ -234,6 +234,6 @@ describe('UsersTable', () => {
     } as unknown as ReturnType<typeof useUsers>)
 
     render(<UsersTable params={{ page: 3, limit: 10 }} onPageChange={vi.fn()} />)
-    expect(screen.getByRole('button', { name: /next/i })).toBeDisabled()
+    expect(screen.getByRole('button', { name: /下一頁/i })).toBeDisabled()
   })
 })
