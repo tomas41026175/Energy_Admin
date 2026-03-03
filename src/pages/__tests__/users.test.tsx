@@ -3,7 +3,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { ToastProvider } from '@/shared/ui/Toast'
 
 vi.mock('@/shared/hooks/useDebounce', () => ({
-  // Return value immediately (no delay) to test debounced branches in coverage
   useDebounce: (value: unknown) => value,
 }))
 vi.mock('@/domains/users/UsersTable', () => ({
@@ -23,6 +22,11 @@ const renderUsers = () =>
     </ToastProvider>,
   )
 
+const getTable = () => {
+  const el = screen.getByTestId('users-table')
+  return JSON.parse(el.dataset.params ?? '{}') as Record<string, unknown>
+}
+
 describe('UsersPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -38,34 +42,14 @@ describe('UsersPage', () => {
     expect(screen.getByText('跳至主要內容')).toBeInTheDocument()
   })
 
-  it('renders search input', () => {
+  it('renders unified search input', () => {
     renderUsers()
-    expect(screen.getByRole('textbox', { name: /依姓名搜尋/i })).toBeInTheDocument()
-  })
-
-  it('renders email search input', () => {
-    renderUsers()
-    expect(screen.getByRole('textbox', { name: /依 email 搜尋/i })).toBeInTheDocument()
-  })
-
-  it('renders ID search input', () => {
-    renderUsers()
-    expect(screen.getByRole('spinbutton', { name: /依 id 搜尋/i })).toBeInTheDocument()
+    expect(screen.getByRole('textbox', { name: /搜尋使用者/i })).toBeInTheDocument()
   })
 
   it('renders status filter select', () => {
     renderUsers()
     expect(screen.getByRole('combobox', { name: /狀態篩選/i })).toBeInTheDocument()
-  })
-
-  it('renders created-from date input', () => {
-    renderUsers()
-    expect(screen.getByLabelText('建立日期起')).toBeInTheDocument()
-  })
-
-  it('renders created-to date input', () => {
-    renderUsers()
-    expect(screen.getByLabelText('建立日期迄')).toBeInTheDocument()
   })
 
   it('renders UsersTable component', () => {
@@ -75,94 +59,49 @@ describe('UsersPage', () => {
 
   it('passes initial page=1 to UsersTable', () => {
     renderUsers()
-    const table = screen.getByTestId('users-table')
-    const params = JSON.parse(table.dataset.params ?? '{}')
-    expect(params.page).toBe(1)
+    expect(getTable().page).toBe(1)
   })
 
-  it('passes name filter when search input changes', () => {
+  it('routes to name param when input has no @', () => {
     renderUsers()
-    const searchInput = screen.getByRole('textbox', { name: /依姓名搜尋/i })
-    fireEvent.change(searchInput, { target: { value: 'alice' } })
-    const table = screen.getByTestId('users-table')
-    const params = JSON.parse(table.dataset.params ?? '{}')
+    fireEvent.change(screen.getByRole('textbox', { name: /搜尋使用者/i }), {
+      target: { value: 'alice' },
+    })
+    const params = getTable()
     expect(params.name).toBe('alice')
+    expect(params.email).toBeUndefined()
   })
 
-  it('passes email filter when email input changes', () => {
+  it('routes to email param when input contains @', () => {
     renderUsers()
-    const emailInput = screen.getByRole('textbox', { name: /依 email 搜尋/i })
-    fireEvent.change(emailInput, { target: { value: 'alice@' } })
-    const table = screen.getByTestId('users-table')
-    const params = JSON.parse(table.dataset.params ?? '{}')
-    expect(params.email).toBe('alice@')
-  })
-
-  it('passes id filter when id input changes', () => {
-    renderUsers()
-    const idInput = screen.getByRole('spinbutton', { name: /依 id 搜尋/i })
-    fireEvent.change(idInput, { target: { value: '5' } })
-    const table = screen.getByTestId('users-table')
-    const params = JSON.parse(table.dataset.params ?? '{}')
-    expect(params.id).toBe(5)
+    fireEvent.change(screen.getByRole('textbox', { name: /搜尋使用者/i }), {
+      target: { value: 'alice@example.com' },
+    })
+    const params = getTable()
+    expect(params.email).toBe('alice@example.com')
+    expect(params.name).toBeUndefined()
   })
 
   it('passes status filter when select changes', () => {
     renderUsers()
-    const select = screen.getByRole('combobox', { name: /狀態篩選/i })
-    fireEvent.change(select, { target: { value: 'active' } })
-    const table = screen.getByTestId('users-table')
-    const params = JSON.parse(table.dataset.params ?? '{}')
-    expect(params.status).toBe('active')
+    fireEvent.change(screen.getByRole('combobox', { name: /狀態篩選/i }), {
+      target: { value: 'active' },
+    })
+    expect(getTable().status).toBe('active')
   })
 
-  it('passes createdFrom filter when date input changes', () => {
+  it('resets page to 1 when search input changes', () => {
     renderUsers()
-    const fromInput = screen.getByLabelText('建立日期起')
-    fireEvent.change(fromInput, { target: { value: '2026-02-01' } })
-    const table = screen.getByTestId('users-table')
-    const params = JSON.parse(table.dataset.params ?? '{}')
-    expect(params.createdFrom).toBe('2026-02-01')
+    fireEvent.change(screen.getByRole('textbox', { name: /搜尋使用者/i }), {
+      target: { value: 'bob' },
+    })
+    expect(getTable().page).toBe(1)
   })
 
-  it('passes createdTo filter when date input changes', () => {
+  it('does not include name or email when search is empty', () => {
     renderUsers()
-    const toInput = screen.getByLabelText('建立日期迄')
-    fireEvent.change(toInput, { target: { value: '2026-02-28' } })
-    const table = screen.getByTestId('users-table')
-    const params = JSON.parse(table.dataset.params ?? '{}')
-    expect(params.createdTo).toBe('2026-02-28')
-  })
-
-  it('resets page to 1 when email filter changes', () => {
-    renderUsers()
-    const emailInput = screen.getByRole('textbox', { name: /依 email 搜尋/i })
-    fireEvent.change(emailInput, { target: { value: 'bob' } })
-    const table = screen.getByTestId('users-table')
-    const params = JSON.parse(table.dataset.params ?? '{}')
-    expect(params.page).toBe(1)
-  })
-
-  it('resets page to 1 when id filter changes', () => {
-    renderUsers()
-    const idInput = screen.getByRole('spinbutton', { name: /依 id 搜尋/i })
-    fireEvent.change(idInput, { target: { value: '3' } })
-    const table = screen.getByTestId('users-table')
-    const params = JSON.parse(table.dataset.params ?? '{}')
-    expect(params.page).toBe(1)
-  })
-
-  it('does not include id param when id input is empty', () => {
-    renderUsers()
-    const table = screen.getByTestId('users-table')
-    const params = JSON.parse(table.dataset.params ?? '{}')
-    expect(params.id).toBeUndefined()
-  })
-
-  it('does not include email param when email input is empty', () => {
-    renderUsers()
-    const table = screen.getByTestId('users-table')
-    const params = JSON.parse(table.dataset.params ?? '{}')
+    const params = getTable()
+    expect(params.name).toBeUndefined()
     expect(params.email).toBeUndefined()
   })
 })
