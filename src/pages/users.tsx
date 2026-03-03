@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react'
+import { useCallback, useMemo, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { UsersTable } from '@/domains/users/UsersTable'
 import { Input } from '@/shared/ui/Input'
@@ -41,7 +41,7 @@ const UsersPage = () => {
     )
   }
 
-  const handleClearSearch = (): void => {
+  const handleClearSearch = useCallback((): void => {
     setSearchParams(
       (prev) => {
         const next = new URLSearchParams(prev)
@@ -52,7 +52,7 @@ const UsersPage = () => {
       { replace: true },
     )
     searchInputRef.current?.focus()
-  }
+  }, [setSearchParams])
 
   const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
     setSearchParams(
@@ -97,21 +97,24 @@ const UsersPage = () => {
 
   const handleEscape = useCallback((): void => {
     if (searchInput) handleClearSearch()
-  }, [searchInput]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [searchInput, handleClearSearch])
 
   useKeyboard('/', handleSlash)
   useKeyboard('Escape', handleEscape)
 
-  const tableParams = {
-    page,
-    limit,
-    ...(debouncedSearch
-      ? isEmailSearch
-        ? { email: debouncedSearch }
-        : { name: debouncedSearch }
-      : {}),
-    ...(statusFilter ? { status: statusFilter } : {}),
-  }
+  const tableParams = useMemo(
+    () => ({
+      page,
+      limit,
+      ...(debouncedSearch
+        ? isEmailSearch
+          ? { email: debouncedSearch }
+          : { name: debouncedSearch }
+        : {}),
+      ...(statusFilter ? { status: statusFilter } : {}),
+    }),
+    [page, limit, debouncedSearch, isEmailSearch, statusFilter],
+  )
 
   return (
     <>
