@@ -29,7 +29,7 @@ const createWrapper = () => {
 }
 
 describe('useUsers', () => {
-  it('should start with loading state', () => {
+  it('should start with loading state', async () => {
     server.use(
       http.get(`${API_BASE}/api/users`, async () => {
         await new Promise((r) => setTimeout(r, 100))
@@ -45,6 +45,9 @@ describe('useUsers', () => {
     })
 
     expect(result.current.isLoading).toBe(true)
+    // Wait for request to complete before afterEach resets MSW handlers,
+    // preventing "Cannot bypass a request" error from in-flight requests
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
   })
 
   it('should return data on success', async () => {

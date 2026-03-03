@@ -32,7 +32,7 @@ describe('AuthGuard', () => {
     } as ReturnType<typeof useAuthStore>)
 
     renderWithRouter()
-    expect(screen.getByText('Loading...')).toBeInTheDocument()
+    expect(screen.getByRole('status', { name: '載入中' })).toBeInTheDocument()
   })
 
   it('redirects to /login when not authenticated', () => {

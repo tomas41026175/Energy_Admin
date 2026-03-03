@@ -1,13 +1,14 @@
 import { lazy, Suspense } from 'react'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { AuthGuard } from '@/auth/auth.guard'
+import { Spinner } from '@/shared/ui/Spinner'
 
 const LoginPage = lazy(() => import('@/pages/login'))
 const UsersPage = lazy(() => import('@/pages/users'))
 
 const suspenseFallback = (
   <div className="min-h-screen flex items-center justify-center">
-    <div className="text-gray-500">Loading...</div>
+    <Spinner size="lg" className="text-blue-600" />
   </div>
 )
 

@@ -31,7 +31,7 @@ describe('Button', () => {
 
   it('renders spinner when isLoading is true', () => {
     render(<Button isLoading>Submit</Button>)
-    expect(screen.getByRole('status', { name: 'Loading' })).toBeInTheDocument()
+    expect(screen.getByRole('status', { name: '載入中' })).toBeInTheDocument()
   })
 
   it('does not call onClick when disabled', async () => {

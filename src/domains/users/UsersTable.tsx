@@ -21,14 +21,14 @@ export const UsersTable = ({ params, onPageChange }: UsersTableProps) => {
   if (isError) {
     return (
       <ErrorMessage
-        message={error?.message ?? 'Failed to load users'}
+        message={error?.message ?? '載入使用者失敗'}
         onRetry={() => void refetch()}
       />
     )
   }
 
   if (!data || data.data.length === 0) {
-    return <EmptyState title="No users found" description="There are no users to display." />
+    return <EmptyState title="找不到使用者" description="目前沒有使用者資料。" />
   }
 
   const { pagination } = data
@@ -50,7 +50,7 @@ export const UsersTable = ({ params, onPageChange }: UsersTableProps) => {
                 scope="col"
                 className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
               >
-                Name
+                姓名
               </th>
               <th
                 scope="col"
@@ -62,13 +62,13 @@ export const UsersTable = ({ params, onPageChange }: UsersTableProps) => {
                 scope="col"
                 className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
               >
-                Status
+                狀態
               </th>
               <th
                 scope="col"
                 className="hidden lg:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
               >
-                Created At
+                建立日期
               </th>
             </tr>
           </thead>
@@ -147,7 +147,7 @@ const StatusBadge = ({ status }: StatusBadgeProps) => (
       status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800',
     )}
   >
-    {status}
+    {status === 'active' ? '啟用' : '停用'}
   </span>
 )
 
@@ -170,15 +170,15 @@ const Pagination = ({ currentPage, totalPages, onPageChange }: PaginationProps) 
   if (totalPages <= 1) return null
 
   return (
-    <nav aria-label="Pagination" className="flex items-center justify-center gap-1 py-4">
+    <nav aria-label="分頁" className="flex items-center justify-center gap-1 py-4">
       <Button
         variant="secondary"
         size="sm"
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage <= 1}
-        aria-label="Go to previous page"
+        aria-label="前往上一頁"
       >
-        Previous
+        上一頁
       </Button>
 
       {getPageWindow(currentPage, totalPages).map((page, idx) => (
@@ -186,7 +186,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }: PaginationProps) 
           key={typeof page === 'number' ? page : `ellipsis-${idx}`}
           onClick={() => typeof page === 'number' && onPageChange(page)}
           disabled={typeof page !== 'number'}
-          aria-label={typeof page === 'number' ? `Go to page ${page}` : undefined}
+          aria-label={typeof page === 'number' ? `前往第 ${page} 頁` : undefined}
           aria-current={page === currentPage ? 'page' : undefined}
           className={cn(
             'w-8 h-8 flex items-center justify-center text-sm rounded-lg border transition-colors duration-100',
@@ -207,16 +207,16 @@ const Pagination = ({ currentPage, totalPages, onPageChange }: PaginationProps) 
         size="sm"
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage >= totalPages}
-        aria-label="Go to next page"
+        aria-label="前往下一頁"
       >
-        Next
+        下一頁
       </Button>
     </nav>
   )
 }
 
 const SkeletonTable = () => (
-  <div className="space-y-2" aria-label="Loading users" aria-busy="true">
+  <div className="space-y-2" aria-label="載入使用者中" aria-busy="true">
     <Skeleton variant="rectangular" height={40} className="w-full" />
     {Array.from({ length: 5 }, (_, i) => (
       <Skeleton key={i} variant="rectangular" height={56} className="w-full" />

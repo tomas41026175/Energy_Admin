@@ -37,7 +37,7 @@ describe('ConfirmDialog', () => {
     await act(async () => {
       render(<ConfirmDialog {...defaultProps} onConfirm={onConfirm} />)
     })
-    await user.click(screen.getByRole('button', { name: 'Confirm' }))
+    await user.click(screen.getByRole('button', { name: '確認' }))
     expect(onConfirm).toHaveBeenCalledTimes(1)
   })
 
@@ -47,7 +47,7 @@ describe('ConfirmDialog', () => {
     await act(async () => {
       render(<ConfirmDialog {...defaultProps} onCancel={onCancel} />)
     })
-    await user.click(screen.getByRole('button', { name: 'Cancel' }))
+    await user.click(screen.getByRole('button', { name: '取消' }))
     expect(onCancel).toHaveBeenCalledTimes(1)
   })
 
@@ -86,7 +86,7 @@ describe('ConfirmDialog', () => {
     await act(async () => {
       render(<ConfirmDialog {...defaultProps} variant="danger" />)
     })
-    const confirmBtn = screen.getByRole('button', { name: 'Confirm' })
+    const confirmBtn = screen.getByRole('button', { name: '確認' })
     expect(confirmBtn).toHaveClass('bg-red-600')
   })
 })

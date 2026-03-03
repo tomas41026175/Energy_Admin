@@ -17,10 +17,12 @@ npx tailwindcss init -p
 
 ### 2. 設定環境變數
 
-建立 `.env`：
+建立 `.env`（本機開發用，不進 git）：
 ```env
 VITE_API_BASE_URL=https://lbbj5pioquwxdexqmcnwaxrpce0lcoqx.lambda-url.ap-southeast-1.on.aws
 ```
+
+> Vercel 部署時在 Dashboard 的 Environment Variables 設定，無需 `.env` 檔案。
 
 ### 3. 建立專案結構
 
