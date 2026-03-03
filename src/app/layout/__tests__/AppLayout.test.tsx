@@ -9,7 +9,7 @@ vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom')
   return {
     ...actual,
-    Outlet: () => <div data-testid="outlet">Outlet Content</div>,
+    Outlet: () => <div>Outlet Content</div>,
   }
 })
 
@@ -46,7 +46,7 @@ describe('AppLayout', () => {
 
   it('renders Outlet (main content area)', () => {
     renderAppLayout()
-    expect(screen.getByTestId('outlet')).toBeInTheDocument()
+    expect(screen.getByText('Outlet Content')).toBeInTheDocument()
   })
 
   it('displays user.username in header', () => {

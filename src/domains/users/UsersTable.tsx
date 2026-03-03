@@ -6,6 +6,7 @@ import { ErrorMessage } from '@/shared/ui/ErrorMessage'
 import { EmptyState } from '@/shared/ui/EmptyState'
 import { Button } from '@/shared/ui/Button'
 import { UserAvatar } from '@/shared/components/UserAvatar'
+import { StatusBadge } from '@/shared/components/StatusBadge'
 
 interface UsersTableProps {
   params: UsersParams
@@ -157,20 +158,6 @@ const UserCard = ({ user }: UserCardProps) => (
   </div>
 )
 
-interface StatusBadgeProps {
-  status: User['status']
-}
-
-const StatusBadge = ({ status }: StatusBadgeProps) => (
-  <span
-    className={cn(
-      'inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full',
-      status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800',
-    )}
-  >
-    {status === 'active' ? '啟用' : '停用'}
-  </span>
-)
 
 const ELLIPSIS = '...' as const
 

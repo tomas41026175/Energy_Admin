@@ -1,4 +1,4 @@
-import { Component, type ErrorInfo, type ReactNode } from 'react'
+import { Component, type ReactNode } from 'react'
 
 interface ErrorBoundaryProps {
   children: ReactNode
@@ -20,8 +20,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     return { hasError: true, error }
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    console.error('ErrorBoundary caught:', error, errorInfo)
+  componentDidCatch(): void {
+    // Production: integrate with error tracking service (e.g. Sentry)
   }
 
   private handleRetry = (): void => {
