@@ -337,3 +337,40 @@
 
 ---
 
+## [2026-03-03 16:05] CR #10 — fix/react-router-v7-warnings
+
+**審查範圍:** git diff main...HEAD（6 個檔案）
+**Commit:** 4a6947c
+
+### 變更清單
+- `src/app/router.tsx` — `createBrowserRouter` 加入 `future: { v7_startTransition, v7_relativeSplatPath }`
+- `src/app/layout/__tests__/AppLayout.test.tsx` — `MemoryRouter` 加入 `future` prop
+- `src/auth/__tests__/auth.guard.test.tsx` — `MemoryRouter` 加入 `future` prop
+- `src/pages/__tests__/dashboard.test.tsx` — `MemoryRouter` 加入 `future` prop
+- `src/pages/__tests__/login.test.tsx` — `MemoryRouter` 加入 `future` prop
+- `memory/cr-log.md` — 補充 CR #9 紀錄
+
+### Learnings 命中
+無
+
+### 發現問題
+| # | 等級 | 面向 | 檔案:行號 | 問題描述 |
+|---|------|------|----------|---------|
+| 1 | 🟢 | 可維護性 | 4 個測試檔 | `ROUTER_FUTURE` 常數在各檔獨立定義，可提取至 test-utils [例外：2 屬性小物件，重複可接受] |
+
+### 統計
+- 🔴 Critical: 0 個
+- 🟠 Domain Issue: 0 個
+- 🟡 Warning: 0 個
+- 🟢 Info: 1 個（例外接受）
+- Learnings 命中: 0 個
+
+### 例外清單
+| # | 等級 | 面向 | 檔案:行號 | 例外理由 |
+|---|------|------|----------|---------|
+| 1 | 🟢 | 可維護性 | 4 測試檔 | 只有 2 個屬性的常數物件，提取共用增加複雜度不值得 |
+
+### 修正狀態: ✅ Approved（無需修正）
+
+---
+
