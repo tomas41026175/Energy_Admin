@@ -7,7 +7,7 @@ vi.mock('@/shared/hooks/useDebounce', () => ({
 }))
 vi.mock('@/domains/users/UsersTable', () => ({
   UsersTable: ({ params }: { params: Record<string, unknown> }) => (
-    <div data-testid="users-table" data-params={JSON.stringify(params)}>
+    <div role="region" aria-label="users-table" data-params={JSON.stringify(params)}>
       UsersTable
     </div>
   ),
@@ -23,8 +23,8 @@ const renderUsers = () =>
   )
 
 const getTable = () => {
-  const el = screen.getByTestId('users-table')
-  return JSON.parse(el.dataset.params ?? '{}') as Record<string, unknown>
+  const el = screen.getByRole('region', { name: 'users-table' })
+  return JSON.parse((el as HTMLElement).dataset.params ?? '{}') as Record<string, unknown>
 }
 
 describe('UsersPage', () => {
@@ -54,7 +54,7 @@ describe('UsersPage', () => {
 
   it('renders UsersTable component', () => {
     renderUsers()
-    expect(screen.getByTestId('users-table')).toBeInTheDocument()
+    expect(screen.getByRole('region', { name: 'users-table' })).toBeInTheDocument()
   })
 
   it('passes initial page=1 to UsersTable', () => {
