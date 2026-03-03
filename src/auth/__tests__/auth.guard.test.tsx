@@ -8,9 +8,11 @@ vi.mock('../auth.store')
 
 const mockUseAuthStore = vi.mocked(useAuthStore)
 
+const ROUTER_FUTURE = { v7_startTransition: true, v7_relativeSplatPath: true }
+
 const renderWithRouter = (initialPath = '/protected') =>
   render(
-    <MemoryRouter initialEntries={[initialPath]}>
+    <MemoryRouter initialEntries={[initialPath]} future={ROUTER_FUTURE}>
       <Routes>
         <Route path="/login" element={<div>Login Page</div>} />
         <Route element={<AuthGuard />}>

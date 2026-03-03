@@ -297,3 +297,43 @@
 
 ---
 
+## [2026-03-03 15:42] CR #9 — refactor/users-smart-search
+
+**審查範圍:** git diff main...HEAD（4 個檔案）
+**Commit:** 9bd93df
+
+### 變更清單
+- `src/domains/users/users.types.ts` — 移除不支援的 API 參數（`id` / `createdFrom` / `createdTo`）
+- `src/shared/mocks/handlers.ts` — 移除對應的篩選邏輯（id / createdFrom / createdTo）
+- `src/pages/users.tsx` — 統一搜尋框（`@` 自動路由至 email，否則路由至 name）；移除獨立 email/id/date 輸入
+- `src/pages/__tests__/users.test.tsx` — 更新測試（新增 `getTable()` helper；新增 `@` 路由行為測試；移除舊篩選測試）
+
+### Learnings 命中
+無（learnings.md 不存在，無歷史錯誤模式可比對）
+
+### 發現問題
+| # | 等級 | 面向 | 檔案:行號 | 問題描述 |
+|---|------|------|----------|---------|
+| 無問題 | | | | 本次為刪減型重構，無新增風險點 |
+
+### 統計
+- 🔴 Critical: 0 個
+- 🟠 Domain Issue: 0 個
+- 🟡 Warning: 0 個
+- 🟢 Info: 1 個（`getByTestId` 用於 mock 組件暴露 params — 刻意設計，非測試實作細節）
+- Learnings 命中: 0 個
+
+### 8 面向檢查表
+- TypeScript 型別安全：✅ 移除未使用型別，無 any
+- 效能問題：✅ 無新增 re-render 風險
+- 安全性：✅ 無敏感資料
+- 可維護性：✅ 79 行新增 / 215 行刪除，淨減 136 行
+- i18n：✅ 單語專案，zh-TW hardcode 可接受
+- 狀態管理：✅ 無 Zustand 相關
+- React 最佳實踐：✅ 無 useEffect，aria-label 正確
+- 測試覆蓋：✅ 215 個測試全數通過
+
+### 修正狀態: ✅ Approved（無需修正）
+
+---
+

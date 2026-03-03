@@ -51,13 +51,15 @@ beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
 afterAll(() => server.close())
 afterEach(() => server.resetHandlers())
 
+const ROUTER_FUTURE = { v7_startTransition: true, v7_relativeSplatPath: true }
+
 const createWrapper = () => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   })
   const Wrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter>
+      <MemoryRouter future={ROUTER_FUTURE}>
         {children}
       </MemoryRouter>
     </QueryClientProvider>

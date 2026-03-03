@@ -20,9 +20,11 @@ vi.mock('react-router-dom', async () => {
 // Import after mocks
 const { default: LoginPage } = await import('../login')
 
+const ROUTER_FUTURE = { v7_startTransition: true, v7_relativeSplatPath: true }
+
 const renderLogin = () =>
   render(
-    <MemoryRouter>
+    <MemoryRouter future={ROUTER_FUTURE}>
       <LoginPage />
     </MemoryRouter>,
   )

@@ -14,47 +14,54 @@ const suspenseFallback = (
   </div>
 )
 
-export const router = createBrowserRouter([
+export const router = createBrowserRouter(
+  [
+    {
+      path: '/login',
+      element: (
+        <Suspense fallback={suspenseFallback}>
+          <LoginPage />
+        </Suspense>
+      ),
+    },
+    {
+      element: <AuthGuard />,
+      children: [
+        {
+          element: <AppLayout />,
+          children: [
+            {
+              path: '/dashboard',
+              element: (
+                <Suspense fallback={suspenseFallback}>
+                  <DashboardPage />
+                </Suspense>
+              ),
+            },
+            {
+              path: '/users',
+              element: (
+                <Suspense fallback={suspenseFallback}>
+                  <UsersPage />
+                </Suspense>
+              ),
+            },
+            // Authenticated users hitting unknown paths → /dashboard
+            { path: '*', element: <Navigate to="/dashboard" replace /> },
+          ],
+        },
+      ],
+    },
+    {
+      path: '/',
+      element: <Navigate to="/login" replace />,
+    },
+    // Unauthenticated users → AuthGuard redirects to /login
+    { path: '*', element: <Navigate to="/login" replace /> },
+  ],
   {
-    path: '/login',
-    element: (
-      <Suspense fallback={suspenseFallback}>
-        <LoginPage />
-      </Suspense>
-    ),
+    future: {
+      v7_relativeSplatPath: true,
+    },
   },
-  {
-    element: <AuthGuard />,
-    children: [
-      {
-        element: <AppLayout />,
-        children: [
-          {
-            path: '/dashboard',
-            element: (
-              <Suspense fallback={suspenseFallback}>
-                <DashboardPage />
-              </Suspense>
-            ),
-          },
-          {
-            path: '/users',
-            element: (
-              <Suspense fallback={suspenseFallback}>
-                <UsersPage />
-              </Suspense>
-            ),
-          },
-          // Authenticated users hitting unknown paths → /dashboard
-          { path: '*', element: <Navigate to="/dashboard" replace /> },
-        ],
-      },
-    ],
-  },
-  {
-    path: '/',
-    element: <Navigate to="/login" replace />,
-  },
-  // Unauthenticated users → AuthGuard redirects to /login
-  { path: '*', element: <Navigate to="/login" replace /> },
-])
+)

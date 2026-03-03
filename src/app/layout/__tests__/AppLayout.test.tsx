@@ -18,9 +18,11 @@ const mockLogout = vi.fn()
 
 const { AppLayout } = await import('../AppLayout')
 
+const ROUTER_FUTURE = { v7_startTransition: true, v7_relativeSplatPath: true }
+
 const renderAppLayout = () =>
   render(
-    <MemoryRouter>
+    <MemoryRouter future={ROUTER_FUTURE}>
       <ToastProvider>
         <AppLayout />
       </ToastProvider>
