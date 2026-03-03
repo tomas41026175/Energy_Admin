@@ -58,6 +58,20 @@ describe('UsersTable', () => {
     expect(screen.getByText('Network error')).toBeInTheDocument()
   })
 
+  it('shows default error message when error has no message', () => {
+    mockUseUsers.mockReturnValue({
+      ...defaultHookResult,
+      data: undefined,
+      isLoading: false,
+      isError: true,
+      error: {} as Error,
+    } as unknown as ReturnType<typeof useUsers>)
+
+    render(<UsersTable params={{ page: 1, limit: 10 }} onPageChange={vi.fn()} />)
+    expect(screen.getByRole('alert')).toBeInTheDocument()
+    expect(screen.getByText('Failed to load users')).toBeInTheDocument()
+  })
+
   it('shows empty state when no users', () => {
     mockUseUsers.mockReturnValue({
       ...defaultHookResult,
@@ -155,5 +169,71 @@ describe('UsersTable', () => {
 
     render(<UsersTable params={{ page: 1, limit: 10 }} onPageChange={vi.fn()} />)
     expect(screen.getByRole('button', { name: /previous/i })).toBeDisabled()
+  })
+
+  it('shows ellipsis for large page count (current near start)', () => {
+    // total_pages > 7, current <= 4 → [1,2,3,4,5,...,20]
+    mockUseUsers.mockReturnValue({
+      ...defaultHookResult,
+      data: {
+        data: mockUsers,
+        pagination: { ...mockPagination, current_page: 2, total_pages: 20, total: 200 },
+      },
+    } as unknown as ReturnType<typeof useUsers>)
+
+    render(<UsersTable params={{ page: 2, limit: 10 }} onPageChange={vi.fn()} />)
+    expect(screen.getByRole('navigation', { name: /pagination/i })).toBeInTheDocument()
+    // Ellipsis buttons should appear (disabled buttons with '...')
+    const ellipsisButtons = screen.getAllByRole('button').filter(
+      (btn) => btn.textContent === '...',
+    )
+    expect(ellipsisButtons.length).toBeGreaterThan(0)
+  })
+
+  it('shows ellipsis for large page count (current near end)', () => {
+    // total_pages > 7, current >= total - 3 → [1,...,16,17,18,19,20]
+    mockUseUsers.mockReturnValue({
+      ...defaultHookResult,
+      data: {
+        data: mockUsers,
+        pagination: { ...mockPagination, current_page: 18, total_pages: 20, total: 200 },
+      },
+    } as unknown as ReturnType<typeof useUsers>)
+
+    render(<UsersTable params={{ page: 18, limit: 10 }} onPageChange={vi.fn()} />)
+    const ellipsisButtons = screen.getAllByRole('button').filter(
+      (btn) => btn.textContent === '...',
+    )
+    expect(ellipsisButtons.length).toBeGreaterThan(0)
+  })
+
+  it('shows ellipsis on both sides for middle page (current in middle)', () => {
+    // total_pages > 7, current = 10 → [1,...,9,10,11,...,20]
+    mockUseUsers.mockReturnValue({
+      ...defaultHookResult,
+      data: {
+        data: mockUsers,
+        pagination: { ...mockPagination, current_page: 10, total_pages: 20, total: 200 },
+      },
+    } as unknown as ReturnType<typeof useUsers>)
+
+    render(<UsersTable params={{ page: 10, limit: 10 }} onPageChange={vi.fn()} />)
+    const ellipsisButtons = screen.getAllByRole('button').filter(
+      (btn) => btn.textContent === '...',
+    )
+    expect(ellipsisButtons.length).toBe(2)
+  })
+
+  it('disables Next button on last page', () => {
+    mockUseUsers.mockReturnValue({
+      ...defaultHookResult,
+      data: {
+        data: mockUsers,
+        pagination: { ...mockPagination, current_page: 3, total_pages: 3 },
+      },
+    } as unknown as ReturnType<typeof useUsers>)
+
+    render(<UsersTable params={{ page: 3, limit: 10 }} onPageChange={vi.fn()} />)
+    expect(screen.getByRole('button', { name: /next/i })).toBeDisabled()
   })
 })

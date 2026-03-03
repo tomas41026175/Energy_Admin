@@ -132,6 +132,28 @@ describe('auth store - restoreSession', () => {
     expect(tokenStore.getRefreshToken()).toBeNull()
   })
 
+  it('should handle invalid JSON in stored user gracefully', async () => {
+    tokenStore.setRefreshToken('valid-refresh')
+    localStorage.setItem('auth_user', 'INVALID_JSON{{{')
+
+    server.use(
+      http.post(`${API_BASE}/auth/refresh`, () => {
+        return HttpResponse.json({
+          access_token: 'restored-access',
+          expires_in: 300,
+        })
+      }),
+    )
+
+    await useAuthStore.getState().restoreSession()
+
+    const state = useAuthStore.getState()
+    // Invalid JSON → getStoredUser returns null → clears state
+    expect(state.isAuthenticated).toBe(false)
+    expect(state.isLoading).toBe(false)
+    expect(state.user).toBeNull()
+  })
+
   it('should clear state when refresh succeeds but no stored user', async () => {
     tokenStore.setRefreshToken('valid-refresh')
 
