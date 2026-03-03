@@ -1,16 +1,22 @@
+import { useMemo, useState } from 'react'
 import { useUsers } from './users.hooks'
 import type { User, UsersParams } from './users.types'
 import { cn } from '@/shared/utils/cn'
 import { Skeleton } from '@/shared/ui/Skeleton'
+import { Spinner } from '@/shared/ui/Spinner'
 import { ErrorMessage } from '@/shared/ui/ErrorMessage'
 import { EmptyState } from '@/shared/ui/EmptyState'
 import { Button } from '@/shared/ui/Button'
 import { UserAvatar } from '@/shared/components/UserAvatar'
 import { StatusBadge } from '@/shared/components/StatusBadge'
 
+type SortField = 'id' | 'name' | 'created_at'
+type SortOrder = 'asc' | 'desc'
+
 interface UsersTableProps {
   params: UsersParams
   onPageChange: (page: number) => void
+  searchQuery?: string
 }
 
 const formatDateUTC8 = (dateStr: string): string => {
@@ -26,8 +32,33 @@ const formatDateUTC8 = (dateStr: string): string => {
   }).format(date)
 }
 
-export const UsersTable = ({ params, onPageChange }: UsersTableProps) => {
+export const UsersTable = ({ params, onPageChange, searchQuery }: UsersTableProps) => {
   const { data, isLoading, isError, error, refetch, isPlaceholderData } = useUsers(params)
+  const [sortField, setSortField] = useState<SortField | null>(null)
+  const [sortOrder, setSortOrder] = useState<SortOrder>('asc')
+
+  // Client-side sort — note: sorts only within the current page (API has no sort support)
+  const sortedUsers = useMemo(() => {
+    if (!data?.data || !sortField) return data?.data ?? []
+    return [...data.data].sort((a, b) => {
+      const aVal = a[sortField]
+      const bVal = b[sortField]
+      const cmp =
+        typeof aVal === 'number' && typeof bVal === 'number'
+          ? aVal - bVal
+          : String(aVal).localeCompare(String(bVal))
+      return sortOrder === 'asc' ? cmp : -cmp
+    })
+  }, [data?.data, sortField, sortOrder])
+
+  const handleSort = (field: SortField): void => {
+    if (sortField === field) {
+      setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'))
+    } else {
+      setSortField(field)
+      setSortOrder('asc')
+    }
+  }
 
   if (isLoading && !data) {
     return <SkeletonTable />
@@ -43,30 +74,53 @@ export const UsersTable = ({ params, onPageChange }: UsersTableProps) => {
   }
 
   if (!data || data.data.length === 0) {
-    return <EmptyState title="找不到使用者" description="目前沒有使用者資料。" />
+    return searchQuery ? (
+      <EmptyState
+        title="找不到符合的使用者"
+        description={`找不到符合「${searchQuery}」的使用者，請嘗試其他關鍵字。`}
+      />
+    ) : (
+      <EmptyState title="找不到使用者" description="目前沒有使用者資料。" />
+    )
   }
 
   const { pagination } = data
 
   return (
     <div className={cn('relative', isPlaceholderData && 'opacity-60')}>
+      {/* Fetching indicator (shown when switching pages with cached data) */}
+      {isPlaceholderData && (
+        <div className="absolute top-2 right-2 z-10">
+          <Spinner size="sm" />
+        </div>
+      )}
+
+      {/* Result count */}
+      <p className="text-sm text-gray-500 mb-3">
+        共 {pagination.total} 筆結果
+      </p>
+
       {/* Desktop / Tablet table (hidden on mobile) */}
       <div className="hidden sm:block overflow-x-auto rounded-lg border border-gray-200">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th
-                scope="col"
-                className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                ID
-              </th>
-              <th
-                scope="col"
-                className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                姓名
-              </th>
+              <SortableHeader
+                label="ID"
+                field="id"
+                sortField={sortField}
+                sortOrder={sortOrder}
+                onSort={handleSort}
+                className="px-4 py-3"
+              />
+              <SortableHeader
+                label="姓名"
+                field="name"
+                sortField={sortField}
+                sortOrder={sortOrder}
+                onSort={handleSort}
+                className="px-4 py-3"
+              />
               <th
                 scope="col"
                 className="hidden lg:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
@@ -79,16 +133,18 @@ export const UsersTable = ({ params, onPageChange }: UsersTableProps) => {
               >
                 狀態
               </th>
-              <th
-                scope="col"
-                className="hidden lg:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                建立日期
-              </th>
+              <SortableHeader
+                label="建立日期"
+                field="created_at"
+                sortField={sortField}
+                sortOrder={sortOrder}
+                onSort={handleSort}
+                className="hidden lg:table-cell px-4 py-3"
+              />
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {data.data.map((user) => (
+            {sortedUsers.map((user) => (
               <TableRow key={user.id} user={user} />
             ))}
           </tbody>
@@ -97,7 +153,7 @@ export const UsersTable = ({ params, onPageChange }: UsersTableProps) => {
 
       {/* Mobile card list (hidden on sm+) */}
       <div className="sm:hidden space-y-3">
-        {data.data.map((user) => (
+        {sortedUsers.map((user) => (
           <UserCard key={user.id} user={user} />
         ))}
       </div>
@@ -108,6 +164,48 @@ export const UsersTable = ({ params, onPageChange }: UsersTableProps) => {
         onPageChange={onPageChange}
       />
     </div>
+  )
+}
+
+
+interface SortableHeaderProps {
+  label: string
+  field: SortField
+  sortField: SortField | null
+  sortOrder: SortOrder
+  onSort: (field: SortField) => void
+  className?: string
+}
+
+const SortableHeader = ({ label, field, sortField, sortOrder, onSort, className }: SortableHeaderProps) => (
+  <th
+    scope="col"
+    className={cn('text-left text-xs font-medium text-gray-500 uppercase tracking-wider', className)}
+  >
+    <button
+      onClick={() => onSort(field)}
+      className="flex items-center gap-1 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+      aria-label={`依${label}排序`}
+    >
+      {label}
+      <SortIcon field={field} sortField={sortField} sortOrder={sortOrder} />
+    </button>
+  </th>
+)
+
+interface SortIconProps {
+  field: SortField
+  sortField: SortField | null
+  sortOrder: SortOrder
+}
+
+const SortIcon = ({ field, sortField, sortOrder }: SortIconProps) => {
+  const isActive = sortField === field
+  return (
+    <span className="inline-flex flex-col" aria-hidden="true">
+      <span className={cn('leading-none text-[10px]', isActive && sortOrder === 'asc' ? 'text-blue-600' : 'text-gray-300')}>▲</span>
+      <span className={cn('leading-none text-[10px]', isActive && sortOrder === 'desc' ? 'text-blue-600' : 'text-gray-300')}>▼</span>
+    </span>
   )
 }
 

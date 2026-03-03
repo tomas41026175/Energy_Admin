@@ -1,10 +1,21 @@
 import { render, screen, waitFor } from '@testing-library/react'
-import { describe, it, expect, beforeAll, afterAll, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeAll, afterAll, afterEach } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
 import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
 import type { ReactNode } from 'react'
+
+// Mock recharts to avoid SVG rendering issues in jsdom
+vi.mock('recharts', () => ({
+  PieChart: ({ children }: { children: ReactNode }) => <div data-testid="pie-chart">{children}</div>,
+  Pie: ({ data }: { data: { name: string; value: number }[] }) => (
+    <div data-testid="pie">{data.map((d) => <span key={d.name}>{d.name}:{d.value}</span>)}</div>
+  ),
+  Cell: () => null,
+  Tooltip: () => null,
+  ResponsiveContainer: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+}))
 
 const API_BASE = 'https://lbbj5pioquwxdexqmcnwaxrpce0lcoqx.lambda-url.ap-southeast-1.on.aws'
 
@@ -17,7 +28,6 @@ const makeUsersResponse = (total: number, users = [
 })
 
 const server = setupServer(
-  // total users
   http.get(`${API_BASE}/api/users`, ({ request }) => {
     const url = new URL(request.url)
     const status = url.searchParams.get('status')
@@ -33,7 +43,6 @@ const server = setupServer(
         { id: 2, name: 'Bob', email: 'bob@example.com', avatar: '', status: 'inactive' as const, created_at: '2026-01-02' },
       ]))
     }
-    // Recent 5 users (limit=5) or total query
     if (limit === '5') {
       return HttpResponse.json(makeUsersResponse(50, [
         { id: 1, name: 'Alice', email: 'alice@example.com', avatar: '', status: 'active' as const, created_at: '2026-01-01' },
@@ -75,7 +84,6 @@ const renderDashboard = () =>
 describe('DashboardPage', () => {
   it('shows skeleton loading state initially (3 stat cards loading)', () => {
     renderDashboard()
-    // Skeletons are aria-hidden, but the loading state should show loading indicators
     const skeletons = document.querySelectorAll('[aria-hidden="true"]')
     expect(skeletons.length).toBeGreaterThanOrEqual(3)
   })
@@ -105,7 +113,6 @@ describe('DashboardPage', () => {
     renderDashboard()
     await waitFor(() => {
       expect(screen.getByText('總使用者')).toBeInTheDocument()
-      // Use getAllByText to handle duplicates (stat label + StatusBadge)
       expect(screen.getAllByText('活躍').length).toBeGreaterThanOrEqual(1)
       expect(screen.getAllByText('停用').length).toBeGreaterThanOrEqual(1)
     })
@@ -133,6 +140,27 @@ describe('DashboardPage', () => {
     renderDashboard()
     await waitFor(() => {
       expect(screen.getByText('alice@example.com')).toBeInTheDocument()
+    })
+  })
+
+  it('renders pie chart section heading', () => {
+    renderDashboard()
+    expect(screen.getByText('使用者狀態分佈')).toBeInTheDocument()
+  })
+
+  it('renders pie chart after data loads', async () => {
+    renderDashboard()
+    await waitFor(() => {
+      expect(screen.getByTestId('pie-chart')).toBeInTheDocument()
+    })
+  })
+
+  it('pie chart shows correct active/inactive counts', async () => {
+    renderDashboard()
+    await waitFor(() => {
+      const pie = screen.getByTestId('pie')
+      expect(pie.textContent).toContain('啟用:30')
+      expect(pie.textContent).toContain('停用:20')
     })
   })
 })

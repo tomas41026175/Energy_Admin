@@ -72,7 +72,7 @@ describe('UsersTable', () => {
     expect(screen.getByText('載入使用者失敗')).toBeInTheDocument()
   })
 
-  it('shows empty state when no users', () => {
+  it('shows generic empty state when no users and no search query', () => {
     mockUseUsers.mockReturnValue({
       ...defaultHookResult,
       data: { data: [], pagination: { ...mockPagination, total: 0 } },
@@ -80,6 +80,20 @@ describe('UsersTable', () => {
 
     render(<UsersTable params={{ page: 1, limit: 10 }} onPageChange={vi.fn()} />)
     expect(screen.getByText('找不到使用者')).toBeInTheDocument()
+    expect(screen.getByText('目前沒有使用者資料。')).toBeInTheDocument()
+  })
+
+  it('shows differentiated empty state when no users with search query', () => {
+    mockUseUsers.mockReturnValue({
+      ...defaultHookResult,
+      data: { data: [], pagination: { ...mockPagination, total: 0 } },
+    } as unknown as ReturnType<typeof useUsers>)
+
+    render(
+      <UsersTable params={{ page: 1, limit: 10 }} onPageChange={vi.fn()} searchQuery="alice" />,
+    )
+    expect(screen.getByText('找不到符合的使用者')).toBeInTheDocument()
+    expect(screen.getByText(/alice/)).toBeInTheDocument()
   })
 
   it('renders user data in table', () => {
@@ -94,7 +108,6 @@ describe('UsersTable', () => {
     mockUseUsers.mockReturnValue(defaultHookResult)
 
     render(<UsersTable params={{ page: 1, limit: 10 }} onPageChange={vi.fn()} />)
-    // avatar is '' in mock data → fallback span with aria-label=name and initial char
     expect(screen.getAllByLabelText('Alice').length).toBeGreaterThan(0)
     expect(screen.getAllByLabelText('Bob').length).toBeGreaterThan(0)
   })
@@ -143,6 +156,30 @@ describe('UsersTable', () => {
       <UsersTable params={{ page: 1, limit: 10 }} onPageChange={vi.fn()} />,
     )
     expect(container.firstChild).toHaveClass('opacity-60')
+  })
+
+  it('shows spinner when isPlaceholderData', () => {
+    mockUseUsers.mockReturnValue({
+      ...defaultHookResult,
+      isPlaceholderData: true,
+    } as unknown as ReturnType<typeof useUsers>)
+
+    render(<UsersTable params={{ page: 1, limit: 10 }} onPageChange={vi.fn()} />)
+    expect(screen.getByRole('status', { name: /載入中/i })).toBeInTheDocument()
+  })
+
+  it('does not show spinner when not isPlaceholderData', () => {
+    mockUseUsers.mockReturnValue(defaultHookResult)
+
+    render(<UsersTable params={{ page: 1, limit: 10 }} onPageChange={vi.fn()} />)
+    expect(screen.queryByRole('status', { name: /載入中/i })).not.toBeInTheDocument()
+  })
+
+  it('shows result count', () => {
+    mockUseUsers.mockReturnValue(defaultHookResult)
+
+    render(<UsersTable params={{ page: 1, limit: 10 }} onPageChange={vi.fn()} />)
+    expect(screen.getByText(/共 2 筆結果/)).toBeInTheDocument()
   })
 
   it('does not show pagination when totalPages is 1', () => {
@@ -194,7 +231,6 @@ describe('UsersTable', () => {
   })
 
   it('shows ellipsis for large page count (current near start)', () => {
-    // total_pages > 7, current <= 4 → [1,2,3,4,5,...,20]
     mockUseUsers.mockReturnValue({
       ...defaultHookResult,
       data: {
@@ -205,7 +241,6 @@ describe('UsersTable', () => {
 
     render(<UsersTable params={{ page: 2, limit: 10 }} onPageChange={vi.fn()} />)
     expect(screen.getByRole('navigation', { name: /分頁/i })).toBeInTheDocument()
-    // Ellipsis buttons should appear (disabled buttons with '...')
     const ellipsisButtons = screen.getAllByRole('button').filter(
       (btn) => btn.textContent === '...',
     )
@@ -213,7 +248,6 @@ describe('UsersTable', () => {
   })
 
   it('shows ellipsis for large page count (current near end)', () => {
-    // total_pages > 7, current >= total - 3 → [1,...,16,17,18,19,20]
     mockUseUsers.mockReturnValue({
       ...defaultHookResult,
       data: {
@@ -230,7 +264,6 @@ describe('UsersTable', () => {
   })
 
   it('shows ellipsis on both sides for middle page (current in middle)', () => {
-    // total_pages > 7, current = 10 → [1,...,9,10,11,...,20]
     mockUseUsers.mockReturnValue({
       ...defaultHookResult,
       data: {
@@ -259,6 +292,37 @@ describe('UsersTable', () => {
     expect(screen.getByRole('button', { name: /下一頁/i })).toBeDisabled()
   })
 
+  describe('client-side sort', () => {
+    it('renders sort buttons for ID, 姓名, 建立日期 columns', () => {
+      mockUseUsers.mockReturnValue(defaultHookResult)
+      render(<UsersTable params={{ page: 1, limit: 10 }} onPageChange={vi.fn()} />)
+      expect(screen.getByRole('button', { name: /依ID排序/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /依姓名排序/i })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /依建立日期排序/i })).toBeInTheDocument()
+    })
+
+    it('sorts users by name ascending on first click', () => {
+      mockUseUsers.mockReturnValue(defaultHookResult)
+      render(<UsersTable params={{ page: 1, limit: 10 }} onPageChange={vi.fn()} />)
+      fireEvent.click(screen.getByRole('button', { name: /依姓名排序/i }))
+      // Alice should come before Bob alphabetically
+      const rows = screen.getAllByRole('row')
+      expect(rows[1].textContent).toContain('Alice')
+      expect(rows[2].textContent).toContain('Bob')
+    })
+
+    it('sorts users by name descending on second click', () => {
+      mockUseUsers.mockReturnValue(defaultHookResult)
+      render(<UsersTable params={{ page: 1, limit: 10 }} onPageChange={vi.fn()} />)
+      const sortBtn = screen.getByRole('button', { name: /依姓名排序/i })
+      fireEvent.click(sortBtn) // asc
+      fireEvent.click(sortBtn) // desc
+      const rows = screen.getAllByRole('row')
+      expect(rows[1].textContent).toContain('Bob')
+      expect(rows[2].textContent).toContain('Alice')
+    })
+  })
+
   describe('formatDateUTC8 (via render)', () => {
     const renderWithDate = (created_at: string) => {
       mockUseUsers.mockReturnValue({
@@ -283,7 +347,6 @@ describe('UsersTable', () => {
     })
 
     it('converts ISO timestamp to UTC+8 with time', () => {
-      // 2026-06-15T00:00:00Z → UTC+8 → 2026-06-15 08:00
       renderWithDate('2026-06-15T00:00:00Z')
       const expected = new Intl.DateTimeFormat('zh-TW', {
         timeZone: 'Asia/Taipei',
