@@ -226,6 +226,136 @@
 
 ---
 
+### 11. URL Query Params 作為搜尋/篩選的唯一狀態來源
+
+**決策**：使用 `useSearchParams`（React Router）取代 `useState`，以 URL 作為篩選狀態的唯一來源。
+
+**理由**：
+- 支援瀏覽器前進/後退（History API 自然實作）
+- 可分享連結（URL 即狀態）
+- 重新整理後保持篩選條件
+- 與 React Router 深度整合，無需額外依賴
+- `replace: true` 避免每次輸入都污染歷史記錄
+
+**實作方式**：
+```tsx
+const [searchParams, setSearchParams] = useSearchParams()
+const page = Number(searchParams.get('page') ?? '1')
+
+const handleSearch = (value: string) => {
+  setSearchParams(prev => {
+    const next = new URLSearchParams(prev)
+    if (value) next.set('q', value) else next.delete('q')
+    next.delete('page') // 搜尋時重置頁碼
+    return next
+  }, { replace: true })
+}
+```
+
+**替代方案**：
+- `useState`：無法分享、重整後丟失
+- 全域 store (Zustand)：過重，且 URL 無法反映狀態
+
+**影響**：
+- 使用者體驗提升（可分享、歷史記錄正常）
+- 測試需要 `MemoryRouter` wrapper
+- 組件需移除原有的 `useState` 狀態
+
+---
+
+### 12. Client-side 排序（API 不支援 sort 參數的應對策略）
+
+**決策**：在 API 不支援 `sort`/`order` 參數時，在前端 `useMemo` 對當前頁資料排序。
+
+**理由**：
+- API 僅支援 `GET /api/users?page&limit&name&email&status`，無排序參數
+- Client-side sort 成本低（每頁最多 50 筆）
+- 用戶可快速驗證當前頁資料
+- 無需後端協助即可提供功能
+
+**實作方式**：
+```tsx
+// 在元件內加上排序 state，useMemo 處理
+const sortedUsers = useMemo(() => {
+  if (!data?.data || !sortField) return data?.data ?? []
+  return [...data.data].sort((a, b) => {
+    const cmp = String(a[sortField]).localeCompare(String(b[sortField]))
+    return sortOrder === 'asc' ? cmp : -cmp
+  })
+}, [data?.data, sortField, sortOrder])
+```
+
+**限制（已在 UI 程式碼加註釋）**：
+- 排序僅影響當前頁；跨頁排序需 API 支援
+
+**影響**：
+- 功能上可用，但跨頁排序有限制
+- 切換頁碼時 sort state 保留，行為一致
+
+---
+
+### 13. 分頁預取（Prefetch）策略
+
+**決策**：在 `useUsers` hook 中，用戶停留當前頁時自動預取下一頁。
+
+**理由**：
+- 使用者翻頁時達成近乎即時的載入體驗
+- TanStack Query 的 `prefetchQuery` 存入同一 cache，命中時直接使用
+- 搭配 `keepPreviousData` 讓翻頁體驗平滑（舊資料保留至新資料到達）
+
+**實作方式**：
+```ts
+// useEffect 在此處合理：prefetch 是 DOM 外的 cache 側效應
+useEffect(() => {
+  const nextPage = (params.page ?? 1) + 1
+  if (query.data && nextPage <= query.data.pagination.total_pages) {
+    void queryClient.prefetchQuery({ queryKey: ['users', { ...params, page: nextPage }], ... })
+  }
+}, [query.data, params, queryClient])
+```
+
+**影響**：
+- 翻頁體驗改善（大多數情況下無 loading）
+- 略增網路請求（但 staleTime 30s 內不重複）
+
+---
+
+### 14. 資料視覺化：選擇 Recharts
+
+**決策**：使用 Recharts 實作 Dashboard 圓餅圖。
+
+**理由**：
+- React 原生（基於 D3），與 React 生命週期整合良好
+- 內建 TypeScript 型別定義
+- `ResponsiveContainer` 輕鬆實作響應式
+- 相對輕量（相較 ECharts、Chart.js）
+- 與現有 Tailwind 設計系統可並存
+
+**替代方案**：
+- Chart.js：非 React-native，需要 wrapper
+- ECharts：功能強大但套件較大
+- Victory：API 類似但維護活躍度較低
+
+**影響**：
+- 增加 bundle 約 ~150KB（recharts + d3 依賴）
+- 測試時需 mock `recharts`（jsdom 不支援 SVG 計算）
+
+---
+
+### 15. Sidebar 收合狀態管理
+
+**決策**：sidebar `collapsed` state 由 `AppLayout` 以 prop 傳遞，不使用全域 store。
+
+**理由**：
+- 狀態僅影響 layout 層，不跨 domain
+- 保持組件關係清晰（AppLayout → Sidebar）
+- 避免 Zustand store 膨脹
+
+**未來考量**：
+- 若需記憶使用者偏好（重開頁面後保留），可改存 localStorage
+
+---
+
 ## 🔄 未來可能的調整
 
 ### 1. 狀態管理
