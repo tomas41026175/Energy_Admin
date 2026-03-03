@@ -78,15 +78,15 @@ const ActiveRatioChart = ({ active, inactive, isLoading }: ActiveRatioChartProps
               innerRadius={50}
               outerRadius={80}
               dataKey="value"
-              label={({ name, percent }: { name: string; percent?: number }) =>
-                `${name} ${((percent ?? 0) * 100).toFixed(0)}%`
+              label={({ name, percent }: { name?: string; percent?: number }) =>
+                `${name ?? ''} ${((percent ?? 0) * 100).toFixed(0)}%`
               }
             >
               {data.map((_, i) => (
                 <Cell key={i} fill={PIE_COLORS[i]} />
               ))}
             </Pie>
-            <Tooltip formatter={(value: number) => `${value} 人`} />
+            <Tooltip formatter={(value: number | undefined) => value != null ? `${value} 人` : ''} />
           </PieChart>
         </ResponsiveContainer>
       )}
