@@ -176,7 +176,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false, onToggleCollapse }
           onClick={onClose}
         />
         {/* Drawer */}
-        <aside className="relative flex flex-col w-64 h-full bg-white shadow-xl">
+        <aside className="animate-slide-in-left relative flex flex-col w-64 h-full bg-white shadow-xl">
           <SidebarContent onClose={onClose} />
         </aside>
       </div>

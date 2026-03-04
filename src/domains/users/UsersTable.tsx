@@ -144,8 +144,8 @@ export const UsersTable = ({ params, onPageChange, searchQuery }: UsersTableProp
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {sortedUsers.map((user) => (
-              <TableRow key={user.id} user={user} />
+            {sortedUsers.map((user, index) => (
+              <TableRow key={user.id} user={user} index={index} />
             ))}
           </tbody>
         </table>
@@ -153,8 +153,8 @@ export const UsersTable = ({ params, onPageChange, searchQuery }: UsersTableProp
 
       {/* Mobile card list (hidden on sm+) */}
       <div className="sm:hidden space-y-3">
-        {sortedUsers.map((user) => (
-          <UserCard key={user.id} user={user} />
+        {sortedUsers.map((user, index) => (
+          <UserCard key={user.id} user={user} index={index} />
         ))}
       </div>
 
@@ -212,10 +212,14 @@ const SortIcon = ({ field, sortField, sortOrder }: SortIconProps) => {
 
 interface TableRowProps {
   user: User
+  index: number
 }
 
-const TableRow = ({ user }: TableRowProps) => (
-  <tr className="hover:bg-gray-50 transition-colors duration-100">
+const TableRow = ({ user, index }: TableRowProps) => (
+  <tr
+    className="hover:bg-gray-50 transition-colors duration-100 animate-fade-in [animation-fill-mode:backwards]"
+    style={{ animationDelay: `${index * 30}ms` }}
+  >
     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{user.id}</td>
     <td className="px-4 py-3 whitespace-nowrap">
       <div className="flex items-center gap-2.5">
@@ -237,10 +241,14 @@ const TableRow = ({ user }: TableRowProps) => (
 
 interface UserCardProps {
   user: User
+  index: number
 }
 
-const UserCard = ({ user }: UserCardProps) => (
-  <div className="bg-white rounded-lg border border-gray-200 p-4 animate-fade-in">
+const UserCard = ({ user, index }: UserCardProps) => (
+  <div
+    className="bg-white rounded-lg border border-gray-200 p-4 animate-fade-in [animation-fill-mode:backwards]"
+    style={{ animationDelay: `${index * 40}ms` }}
+  >
     <div className="flex items-start justify-between gap-2">
       <div className="flex items-center gap-3 min-w-0">
         <UserAvatar name={user.name} avatar={user.avatar} size="lg" />
@@ -322,12 +330,12 @@ const Pagination = ({ currentPage, totalPages, onPageChange }: PaginationProps) 
           aria-label={typeof page === 'number' ? `前往第 ${page} 頁` : undefined}
           aria-current={page === currentPage ? 'page' : undefined}
           className={cn(
-            'w-8 h-8 flex items-center justify-center text-sm rounded-lg border transition-colors duration-100',
+            'w-8 h-8 flex items-center justify-center text-sm rounded-lg border transition duration-100',
             'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1',
             page === currentPage
               ? 'bg-blue-600 text-white border-blue-600'
               : typeof page === 'number'
-                ? 'border-gray-200 hover:bg-gray-50'
+                ? 'border-gray-200 hover:bg-gray-50 hover:scale-105'
                 : 'cursor-default border-transparent text-gray-400',
           )}
         >

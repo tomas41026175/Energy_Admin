@@ -53,6 +53,7 @@ describe('ToastProvider', () => {
   })
 
   it('closes toast when close button clicked', () => {
+    vi.useFakeTimers()
     render(
       <ToastProvider>
         <ToastTrigger message="Closeable" />
@@ -62,7 +63,11 @@ describe('ToastProvider', () => {
     expect(screen.getByText('Closeable')).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: /關閉/i }))
+    act(() => {
+      vi.advanceTimersByTime(200)
+    })
     expect(screen.queryByText('Closeable')).not.toBeInTheDocument()
+    vi.useRealTimers()
   })
 
   it('applies correct style for error type', () => {
