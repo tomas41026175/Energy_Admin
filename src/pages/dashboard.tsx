@@ -69,26 +69,28 @@ const ActiveRatioChart = ({ active, inactive, isLoading }: ActiveRatioChartProps
       {isLoading ? (
         <Skeleton variant="rectangular" height={200} />
       ) : (
-        <ResponsiveContainer width="100%" height={200}>
-          <PieChart>
-            <Pie
-              data={data}
-              cx="50%"
-              cy="50%"
-              innerRadius={50}
-              outerRadius={80}
-              dataKey="value"
-              label={({ name, percent }: { name?: string; percent?: number }) =>
-                `${name ?? ''} ${((percent ?? 0) * 100).toFixed(0)}%`
-              }
-            >
-              {data.map((_, i) => (
-                <Cell key={i} fill={PIE_COLORS[i]} />
-              ))}
-            </Pie>
-            <Tooltip formatter={(value: number | undefined) => value != null ? `${value} 人` : ''} />
-          </PieChart>
-        </ResponsiveContainer>
+        <div aria-hidden="true">
+          <ResponsiveContainer width="100%" height={200}>
+            <PieChart>
+              <Pie
+                data={data}
+                cx="50%"
+                cy="50%"
+                innerRadius={50}
+                outerRadius={80}
+                dataKey="value"
+                label={({ name, percent }: { name?: string; percent?: number }) =>
+                  `${name ?? ''} ${((percent ?? 0) * 100).toFixed(0)}%`
+                }
+              >
+                {data.map((_, i) => (
+                  <Cell key={i} fill={PIE_COLORS[i]} />
+                ))}
+              </Pie>
+              <Tooltip formatter={(value: number | undefined) => value != null ? `${value} 人` : ''} />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
       )}
     </div>
   )
