@@ -374,3 +374,32 @@
 
 ---
 
+
+## [2026-03-03 16:50] CR #11 — refactor/health-check-fixes
+
+**審查範圍:** git diff main...HEAD（9 個檔案）
+**Commit:** 1f9f1b9
+
+### 變更清單
+- `src/shared/components/StatusBadge.tsx` — 新建共用元件（從 dashboard/UsersTable 提取）
+- `src/domains/users/UsersTable.tsx` — 改用共用 StatusBadge，移除本地定義
+- `src/pages/dashboard.tsx` — 改用共用 StatusBadge，移除本地定義
+- `src/shared/ui/ErrorMessage.tsx` — "Retry" → "重試"
+- `src/main.tsx` — 移除非空斷言，加入 null check
+- `src/shared/components/ErrorBoundary.tsx` — 移除 console.error，移除未使用 import
+- `src/app/layout/__tests__/AppLayout.test.tsx` — getByTestId → getByText
+- `src/shared/ui/__tests__/ErrorMessage.test.tsx` — 更新按鈕文字匹配
+- `src/domains/users/__tests__/UsersTable.test.tsx` — 更新按鈕文字匹配
+
+### 發現問題
+無（本次為品質改善，無新增風險）
+
+### 統計
+- 🔴 Critical: 0 個
+- 🟠 Domain Issue: 0 個
+- 🟡 Warning: 0 個
+- 🟢 Info: 0 個
+
+### 修正狀態: ✅ Approved
+
+---
