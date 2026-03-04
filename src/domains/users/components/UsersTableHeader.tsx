@@ -13,7 +13,7 @@ const SortIcon = ({ field, sortField, sortOrder }: SortIconProps) => {
   const isActive = sortField === field
   return (
     <span className="inline-flex flex-col" aria-hidden="true">
-      <span className={cn('leading-none text-[10px]', isActive && sortOrder === 'asc' ? 'text-blue-600' : 'text-gray-300')}>▲</span>
+      <span className={cn('leading-none text-[10px] -mb-0.5', isActive && sortOrder === 'asc' ? 'text-blue-600' : 'text-gray-300')}>▲</span>
       <span className={cn('leading-none text-[10px]', isActive && sortOrder === 'desc' ? 'text-blue-600' : 'text-gray-300')}>▼</span>
     </span>
   )
@@ -35,7 +35,7 @@ export const SortableHeader = ({ label, field, sortField, sortOrder, onSort, cla
   >
     <button
       onClick={() => onSort(field)}
-      className="flex items-center gap-1 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
+      className="flex items-center gap-1.5 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded"
       aria-label={`依${label}排序`}
     >
       {label}
