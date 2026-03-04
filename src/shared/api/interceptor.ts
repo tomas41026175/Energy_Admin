@@ -73,9 +73,9 @@ apiClient.interceptors.response.use(
         expires_in: number
       }>('/auth/refresh', { refresh_token: refreshToken })
 
-      const { access_token } = response.data
+      const { access_token, expires_in } = response.data
 
-      tokenStore.setAccessToken(access_token)
+      tokenStore.setAccessToken(access_token, expires_in)
       // Refresh token stays in localStorage; /auth/refresh does not rotate it
 
       processQueue(null, access_token)

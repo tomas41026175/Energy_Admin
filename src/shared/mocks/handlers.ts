@@ -60,13 +60,16 @@ export const handlers = [
     return HttpResponse.json({
       access_token: 'mock-access-token',
       refresh_token: 'mock-refresh-token',
+      expires_in: 300,
+      user: { id: 1, username: 'admin' },
     })
   }),
 
   http.post(`${API_BASE}/auth/refresh`, () => {
+    // /auth/refresh 不旋轉 refresh_token，僅回傳新 access_token
     return HttpResponse.json({
       access_token: 'new-access-token',
-      refresh_token: 'new-refresh-token',
+      expires_in: 300,
     })
   }),
 ]
