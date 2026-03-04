@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
 import { useAuthStore } from '@/auth/auth.store'
 import { useToast } from '@/shared/hooks/useToast'
 import { useNetworkStatus } from '@/shared/hooks/useNetworkStatus'
@@ -10,6 +10,7 @@ export const AppLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 
+  const { pathname } = useLocation()
   const user = useAuthStore((s) => s.user)
   const logout = useAuthStore((s) => s.logout)
   const { addToast } = useToast()
@@ -34,7 +35,7 @@ export const AppLayout = () => {
         {!isOnline && (
           <div
             role="alert"
-            className="bg-yellow-50 border-b border-yellow-200 text-yellow-800 text-sm text-center py-2 px-4"
+            className="animate-slide-down bg-yellow-50 border-b border-yellow-200 text-yellow-800 text-sm text-center py-2 px-4"
           >
             ⚠️ 目前離線，顯示的資料可能不是最新
           </div>
@@ -64,7 +65,9 @@ export const AppLayout = () => {
         </header>
 
         <main className="flex-1 p-4 sm:p-6">
-          <Outlet />
+          <div key={pathname} className="animate-fade-in">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

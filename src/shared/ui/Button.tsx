@@ -42,7 +42,7 @@ export const Button = ({
       className={cn(
         'inline-flex items-center justify-center gap-2 rounded-lg border font-medium',
         'focus:outline-none focus:ring-2 focus:ring-offset-2',
-        'transition-colors duration-150',
+        'transition duration-150 active:scale-[0.97]',
         'disabled:opacity-50 disabled:cursor-not-allowed',
         VARIANT_CLASSES[variant],
         SIZE_CLASSES[size],

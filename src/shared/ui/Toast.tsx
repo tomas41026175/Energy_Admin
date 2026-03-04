@@ -1,4 +1,4 @@
-import { useCallback, useState, type ReactNode } from 'react'
+import { useCallback, useRef, useState, type ReactNode } from 'react'
 import { cn } from '@/shared/utils/cn'
 import { ToastContext, type Toast, type ToastType } from '@/shared/hooks/useToast'
 
@@ -8,18 +8,51 @@ interface ToastProviderProps {
 
 export const ToastProvider = ({ children }: ToastProviderProps) => {
   const [toasts, setToasts] = useState<readonly Toast[]>([])
+  const [leavingIds, setLeavingIds] = useState<ReadonlySet<string>>(new Set())
+  const autoTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map())
 
-  const removeToast = useCallback((id: string) => {
+  const finalRemove = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id))
+    setLeavingIds((prev) => {
+      const next = new Set(prev)
+      next.delete(id)
+      return next
+    })
   }, [])
+
+  const startLeave = useCallback(
+    (id: string) => {
+      // Cancel auto-dismiss timer if user closes manually
+      const autoTimer = autoTimersRef.current.get(id)
+      if (autoTimer) {
+        clearTimeout(autoTimer)
+        autoTimersRef.current.delete(id)
+      }
+      setLeavingIds((prev) => {
+        if (prev.has(id)) return prev
+        return new Set([...prev, id])
+      })
+      setTimeout(() => finalRemove(id), 200)
+    },
+    [finalRemove],
+  )
+
+  const removeToast = useCallback(
+    (id: string) => {
+      startLeave(id)
+    },
+    [startLeave],
+  )
 
   const addToast = useCallback(
     (type: ToastType, message: string) => {
       const id = crypto.randomUUID()
       setToasts((prev) => [...prev, { id, type, message }])
-      setTimeout(() => removeToast(id), 3000)
+      // Start leave animation at 2800ms so element removes at 3000ms total
+      const timer = setTimeout(() => startLeave(id), 2800)
+      autoTimersRef.current.set(id, timer)
     },
-    [removeToast],
+    [startLeave],
   )
 
   return (
@@ -27,7 +60,12 @@ export const ToastProvider = ({ children }: ToastProviderProps) => {
       {children}
       <div className="fixed top-4 right-4 z-50 flex flex-col gap-2">
         {toasts.map((toast) => (
-          <ToastItem key={toast.id} toast={toast} onClose={() => removeToast(toast.id)} />
+          <ToastItem
+            key={toast.id}
+            toast={toast}
+            isLeaving={leavingIds.has(toast.id)}
+            onClose={() => removeToast(toast.id)}
+          />
         ))}
       </div>
     </ToastContext.Provider>
@@ -36,6 +74,7 @@ export const ToastProvider = ({ children }: ToastProviderProps) => {
 
 interface ToastItemProps {
   toast: Toast
+  isLeaving: boolean
   onClose: () => void
 }
 
@@ -46,12 +85,13 @@ const TOAST_STYLES: Record<ToastType, string> = {
   info: 'bg-blue-50 text-blue-800 border-blue-200',
 }
 
-const ToastItem = ({ toast, onClose }: ToastItemProps) => {
+const ToastItem = ({ toast, isLeaving, onClose }: ToastItemProps) => {
   return (
     <div
       role="alert"
       className={cn(
         'rounded-lg border px-4 py-3 shadow-sm min-w-[300px] flex items-center justify-between',
+        isLeaving ? 'animate-slide-out-right' : 'animate-slide-in-right',
         TOAST_STYLES[toast.type],
       )}
     >
