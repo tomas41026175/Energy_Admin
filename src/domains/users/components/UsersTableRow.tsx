@@ -2,7 +2,7 @@ import { UserAvatar } from '@/shared/components/UserAvatar'
 import { StatusBadge } from '@/shared/components/StatusBadge'
 import type { User } from '../users.types'
 
-export const formatDateUTC8 = (dateStr: string): string => {
+const formatDateUTC8 = (dateStr: string): string => {
   const date = new Date(dateStr)
   if (isNaN(date.getTime())) return dateStr
   const isDateOnly = /^\d{4}-\d{2}-\d{2}$/.test(dateStr)

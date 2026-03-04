@@ -3,7 +3,7 @@ import { Button } from '@/shared/ui/Button'
 
 const ELLIPSIS = '...' as const
 
-export const getPageWindow = (current: number, total: number): (number | typeof ELLIPSIS)[] => {
+const getPageWindow = (current: number, total: number): (number | typeof ELLIPSIS)[] => {
   if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
   if (current <= 4) return [1, 2, 3, 4, 5, ELLIPSIS, total]
   if (current >= total - 3) return [1, ELLIPSIS, total - 4, total - 3, total - 2, total - 1, total]
