@@ -61,7 +61,7 @@ export const handlers = [
       access_token: 'mock-access-token',
       refresh_token: 'mock-refresh-token',
       expires_in: 300,
-      user: { id: 1, username: 'admin' },
+      user: { username: 'admin', role: 'admin' },
     })
   }),
 
