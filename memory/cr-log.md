@@ -422,3 +422,48 @@
 
 ### 修正狀態: ✅ 已修正
 ---
+
+## [2026-03-04 11:33] CR #9 — feat/interactive-animations
+
+**審查範圍:** 新增互動動畫（9 個檔案）：tailwind keyframes、Toast slide-in/out、Button press、AppLayout route fade、Sidebar drawer、UsersTable stagger、Pagination hover、users clear button pop-in
+**Commit:** 9fde017
+
+### 發現問題
+無
+
+### 統計
+- 🔴 Critical: 0 個
+- 🟠 Domain Issue: 0 個
+- 🟡 Warning: 0 個
+- 🟢 Info: 1 個
+- Learnings 命中: 0 個
+- Domain Rules 命中: 0 個
+
+### 例外清單
+| # | 等級 | 面向 | 檔案:行號 | 例外理由 |
+|---|---|---|---|---|
+| 1 | 🟢 | 效能 | Toast.tsx:60 | inline arrow function，Toast 數量極少（< 5），效能影響可忽略 |
+
+### 修正狀態: ✅ 已修正
+---
+
+## [2026-03-04 11:52] CR #7 — refactor/tech-debt-cleanup
+
+**審查範圍:** 技術債清償 — 元件拆分 + StatusBadge 耦合修正（14 個檔案）
+**Commit:** ceb1aef（修正後）
+
+### 發現問題
+| # | 等級 | 面向 | 檔案:行號 | 問題描述 |
+|---|---|---|---|---|
+| 1 | 🔴 | React 最佳實踐 | UsersTablePagination.tsx:6 | `getPageWindow` utility 與元件混合 export，違反 react-refresh/only-export-components |
+| 2 | 🔴 | React 最佳實踐 | UsersTableRow.tsx:5 | `formatDateUTC8` utility 與元件混合 export，同上 |
+
+### 統計
+- 🔴 Critical: 2 個（已修正）
+- 🟠 Domain Issue: 0 個
+- 🟡 Warning: 0 個
+- 🟢 Info: 0 個
+- Learnings 命中: 0 個
+
+### 修正狀態: ✅ 已修正
+---
