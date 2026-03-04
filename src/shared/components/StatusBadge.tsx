@@ -1,8 +1,7 @@
 import { cn } from '@/shared/utils/cn'
-import type { UserStatus } from '@/domains/users/users.types'
 
 interface StatusBadgeProps {
-  status: UserStatus
+  status: 'active' | 'inactive'
 }
 
 export const StatusBadge = ({ status }: StatusBadgeProps) => (

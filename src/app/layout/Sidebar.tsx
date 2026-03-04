@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { cn } from '@/shared/utils/cn'
+import { HomeIcon, UsersIcon, CollapseIcon } from './sidebar-icons'
 
 interface NavItem {
   to: string
@@ -13,62 +14,6 @@ interface SidebarProps {
   collapsed?: boolean
   onToggleCollapse?: () => void
 }
-
-const HomeIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className="w-5 h-5 shrink-0"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={2}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-  >
-    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-    <polyline points="9 22 9 12 15 12 15 22" />
-  </svg>
-)
-
-const UsersIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className="w-5 h-5 shrink-0"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={2}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-  >
-    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-    <circle cx="9" cy="7" r="4" />
-    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-  </svg>
-)
-
-const CollapseIcon = ({ collapsed }: { collapsed: boolean }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className="w-4 h-4"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={2}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-  >
-    {collapsed ? (
-      <polyline points="9 18 15 12 9 6" />
-    ) : (
-      <polyline points="15 18 9 12 15 6" />
-    )}
-  </svg>
-)
 
 const NAV_ITEMS: NavItem[] = [
   { to: '/dashboard', label: '儀表板', icon: <HomeIcon /> },
@@ -90,11 +35,10 @@ const SidebarContent = ({ onClose, collapsed = false, onToggleCollapse }: Sideba
         collapsed ? 'justify-center px-3' : 'justify-between px-6',
       )}
     >
-      {!collapsed && (
-        <span className="text-blue-600 font-bold text-lg tracking-tight">⚡ Energy Admin</span>
-      )}
-      {collapsed && (
+      {collapsed ? (
         <span className="text-blue-600 font-bold text-xl">⚡</span>
+      ) : (
+        <span className="text-blue-600 font-bold text-lg tracking-tight">⚡ Energy Admin</span>
       )}
       {onClose && (
         <button
@@ -134,7 +78,7 @@ const SidebarContent = ({ onClose, collapsed = false, onToggleCollapse }: Sideba
       ))}
     </nav>
 
-    {/* Collapse toggle button (desktop only) */}
+    {/* Collapse toggle (desktop only) */}
     {onToggleCollapse && (
       <div className="px-2 pb-4">
         <button
@@ -156,7 +100,7 @@ const SidebarContent = ({ onClose, collapsed = false, onToggleCollapse }: Sideba
 
 export const Sidebar = ({ isOpen, onClose, collapsed = false, onToggleCollapse }: SidebarProps) => (
   <>
-    {/* Desktop sidebar — sticky, always visible on lg+ */}
+    {/* Desktop sidebar */}
     <aside
       className={cn(
         'hidden lg:flex lg:flex-col lg:shrink-0 bg-white border-r border-gray-200 sticky top-0 h-screen transition-all duration-200',
@@ -169,13 +113,7 @@ export const Sidebar = ({ isOpen, onClose, collapsed = false, onToggleCollapse }
     {/* Mobile overlay */}
     {isOpen && (
       <div className="fixed inset-0 z-40 lg:hidden">
-        {/* Backdrop */}
-        <div
-          className="fixed inset-0 bg-gray-600 bg-opacity-75"
-          aria-hidden="true"
-          onClick={onClose}
-        />
-        {/* Drawer */}
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-75" aria-hidden="true" onClick={onClose} />
         <aside className="animate-slide-in-left relative flex flex-col w-64 h-full bg-white shadow-xl">
           <SidebarContent onClose={onClose} />
         </aside>

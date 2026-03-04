@@ -422,3 +422,27 @@
 
 ### 修正狀態: ✅ 已修正
 ---
+
+## [2026-03-04 11:33] CR #9 — feat/interactive-animations
+
+**審查範圍:** 新增互動動畫（9 個檔案）：tailwind keyframes、Toast slide-in/out、Button press、AppLayout route fade、Sidebar drawer、UsersTable stagger、Pagination hover、users clear button pop-in
+**Commit:** 9fde017
+
+### 發現問題
+無
+
+### 統計
+- 🔴 Critical: 0 個
+- 🟠 Domain Issue: 0 個
+- 🟡 Warning: 0 個
+- 🟢 Info: 1 個
+- Learnings 命中: 0 個
+- Domain Rules 命中: 0 個
+
+### 例外清單
+| # | 等級 | 面向 | 檔案:行號 | 例外理由 |
+|---|---|---|---|---|
+| 1 | 🟢 | 效能 | Toast.tsx:60 | inline arrow function，Toast 數量極少（< 5），效能影響可忽略 |
+
+### 修正狀態: ✅ 已修正
+---
