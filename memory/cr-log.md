@@ -403,3 +403,22 @@
 ### 修正狀態: ✅ Approved
 
 ---
+
+## [2026-03-04 10:55] CR #8 — fix/i18n-error-messages
+
+**審查範圍:** 將所有使用者可見英文錯誤訊息改為繁體中文（6 個檔案）
+**Commit:** ed14505
+
+### 發現問題
+無
+
+### 統計
+- 🔴 Critical: 0 個
+- 🟠 Domain Issue: 0 個
+- 🟡 Warning: 0 個
+- 🟢 Info: 0 個
+- Learnings 命中: 0 個
+- Domain Rules 命中: 0 個
+
+### 修正狀態: ✅ 已修正
+---

@@ -4,6 +4,15 @@
 
 ## 📚 文件列表
 
+### 00 - 專案概覽
+
+- **[00-project-overview.md](./00-project-overview.md)** - 專案說明文件
+  - 專案簡介與技術棧
+  - 系統架構與資料夾結構
+  - 核心功能（認證、使用者列表、Dashboard）
+  - UX 細節與錯誤處理架構
+  - 測試覆蓋率與 CI/CD 部署
+
 ### 01 - 快速開始
 
 - **[01-quick-reference.md](./01-quick-reference.md)** - 快速參考指南
@@ -71,6 +80,7 @@
 ```
 docs/
 ├── README.md                    # 本文件（文件索引）
+├── 00-project-overview.md       # 專案說明文件
 ├── 01-quick-reference.md        # 快速參考指南
 ├── 02-technical-decisions.md   # 技術決策與架構設計
 ├── 03-implementation-guide.md  # 詳細實作指南
@@ -82,12 +92,13 @@ docs/
 
 ## 📖 閱讀順序建議
 
-1. **快速開始**：[01-quick-reference.md](./01-quick-reference.md) - 了解核心概念與快速上手
-2. **API 文件**：[04-api-documentation.md](./04-api-documentation.md) - 了解 API 端點規格與使用方式
-3. **技術決策**：[02-technical-decisions.md](./02-technical-decisions.md) - 了解架構設計與技術選型理由
-4. **實作指南**：[03-implementation-guide.md](./03-implementation-guide.md) - 查看詳細實作步驟與程式碼
-5. **測試策略**：[05-testing-strategy.md](./05-testing-strategy.md) - 了解推薦的測試方法
-6. **完整測試**：[05-api-testing-guide.md](./05-api-testing-guide.md) - 深入了解測試實作細節
+1. **專案概覽**：[00-project-overview.md](./00-project-overview.md) - 了解整體架構與核心功能
+2. **快速開始**：[01-quick-reference.md](./01-quick-reference.md) - 了解核心概念與快速上手
+3. **API 文件**：[04-api-documentation.md](./04-api-documentation.md) - 了解 API 端點規格與使用方式
+4. **技術決策**：[02-technical-decisions.md](./02-technical-decisions.md) - 了解架構設計與技術選型理由
+5. **實作指南**：[03-implementation-guide.md](./03-implementation-guide.md) - 查看詳細實作步驟與程式碼
+6. **測試策略**：[05-testing-strategy.md](./05-testing-strategy.md) - 了解推薦的測試方法
+7. **完整測試**：[05-api-testing-guide.md](./05-api-testing-guide.md) - 深入了解測試實作細節
 
 ## 📁 專案計畫
 
