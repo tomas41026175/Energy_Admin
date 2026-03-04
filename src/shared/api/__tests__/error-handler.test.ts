@@ -44,7 +44,7 @@ describe('classifyError', () => {
   it('should classify non-Error value as warning with fallback message', () => {
     const result = classifyError('string error')
     expect(result.severity).toBe('warning')
-    expect(result.error.message).toBe('Unknown error')
+    expect(result.error.message).toBe('發生未知錯誤')
   })
 })
 
@@ -77,7 +77,7 @@ describe('normalizeAxiosError', () => {
     const error = createAxiosError(401, { message: 'Unauthorized' })
     const result = normalizeAxiosError(error)
     expect(result).toBeInstanceOf(AuthError)
-    expect(result.message).toBe('Unauthorized')
+    expect(result.message).toBe('帳號或密碼錯誤，請重新確認')
   })
 
   it('should return ValidationError for 400', () => {

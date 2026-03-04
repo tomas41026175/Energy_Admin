@@ -52,7 +52,7 @@ export const classifyError = (error: unknown): ClassifiedError => {
 
   return {
     severity: 'warning',
-    error: new AppError(error instanceof Error ? error.message : 'Unknown error'),
+    error: new AppError(error instanceof Error ? error.message : '發生未知錯誤'),
     shouldLogout: false,
   }
 }
@@ -66,7 +66,7 @@ export const normalizeAxiosError = (error: AxiosError<{ message?: string }>): Ap
   const message = error.response.data?.message ?? error.message
 
   if (status === 401) {
-    return new AuthError(message)
+    return new AuthError('帳號或密碼錯誤，請重新確認')
   }
 
   if (status === 400) {

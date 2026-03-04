@@ -1,8 +1,8 @@
 import { z } from 'zod'
 
 export const loginRequestSchema = z.object({
-  username: z.string().min(1, 'Username is required'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  username: z.string().min(1, '請輸入帳號'),
+  password: z.string().min(6, '密碼至少需要 6 個字元'),
 })
 
 export const authUserSchema = z.object({

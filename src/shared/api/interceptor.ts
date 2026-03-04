@@ -65,7 +65,7 @@ apiClient.interceptors.response.use(
     try {
       const refreshToken = tokenStore.getRefreshToken()
       if (!refreshToken) {
-        throw new AuthError('No refresh token available')
+        throw new AuthError('登入憑證不存在，請重新登入')
       }
 
       const response = await apiClient.post<{
@@ -85,7 +85,7 @@ apiClient.interceptors.response.use(
     } catch (refreshError) {
       processQueue(refreshError, null)
       tokenStore.clearAll()
-      return Promise.reject(new AuthError('Session expired'))
+      return Promise.reject(new AuthError('登入工作階段已過期，請重新登入'))
     } finally {
       isRefreshing = false
     }
