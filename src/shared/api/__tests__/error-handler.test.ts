@@ -102,12 +102,12 @@ describe('normalizeAxiosError', () => {
     const error = createAxiosError(403, { message: 'Forbidden' })
     const result = normalizeAxiosError(error)
     expect(result).toBeInstanceOf(AppError)
-    expect(result.message).toBe('Forbidden')
+    expect(result.message).toBe('請求失敗，請稍後再試')
   })
 
-  it('should use AxiosError message as fallback when no response message', () => {
+  it('should use fixed Chinese message for 500 regardless of backend message', () => {
     const error = createAxiosError(500, {}, 'Network Error')
     const result = normalizeAxiosError(error)
-    expect(result.message).toBe('Network Error')
+    expect(result.message).toBe('伺服器錯誤，請稍後再試')
   })
 })

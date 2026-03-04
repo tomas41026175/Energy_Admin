@@ -59,23 +59,22 @@ export const classifyError = (error: unknown): ClassifiedError => {
 
 export const normalizeAxiosError = (error: AxiosError<{ message?: string }>): AppError => {
   if (!error.response) {
-    return new NetworkError(error.message)
+    return new NetworkError()
   }
 
   const status = error.response.status
-  const message = error.response.data?.message ?? error.message
 
   if (status === 401) {
     return new AuthError('帳號或密碼錯誤，請重新確認')
   }
 
   if (status === 400) {
-    return new ValidationError(message)
+    return new ValidationError()
   }
 
   if (status >= 500) {
-    return new ServerError(message, status)
+    return new ServerError('伺服器錯誤，請稍後再試', status)
   }
 
-  return new AppError(message, String(status))
+  return new AppError('請求失敗，請稍後再試', String(status))
 }
