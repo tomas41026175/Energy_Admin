@@ -69,7 +69,7 @@ const ActiveRatioChart = ({ active, inactive, isLoading }: ActiveRatioChartProps
       {isLoading ? (
         <Skeleton variant="rectangular" height={200} />
       ) : (
-        <div aria-hidden="true" className="outline-none">
+        <div aria-hidden="true" className="outline-none [&_svg]:outline-none [&_svg_*]:outline-none">
           <ResponsiveContainer width="100%" height={200}>
             <PieChart style={{ outline: 'none' }}>
               <Pie
