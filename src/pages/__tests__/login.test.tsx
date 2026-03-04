@@ -93,7 +93,7 @@ describe('LoginPage', () => {
   })
 
   it('shows error message on login failure', async () => {
-    mockLogin.mockRejectedValueOnce(new Error('Invalid credentials'))
+    mockLogin.mockRejectedValueOnce(new Error('帳號或密碼錯誤，請重新確認'))
     renderLogin()
 
     fireEvent.change(screen.getByLabelText(/帳號/i), { target: { value: 'admin' } })
@@ -101,7 +101,7 @@ describe('LoginPage', () => {
     fireEvent.click(screen.getByRole('button', { name: /登入/i }))
 
     await waitFor(() => {
-      expect(screen.getByRole('alert')).toHaveTextContent('Invalid credentials')
+      expect(screen.getByRole('alert')).toHaveTextContent('帳號或密碼錯誤，請重新確認')
     })
   })
 
