@@ -446,3 +446,24 @@
 
 ### 修正狀態: ✅ 已修正
 ---
+
+## [2026-03-04 11:52] CR #7 — refactor/tech-debt-cleanup
+
+**審查範圍:** 技術債清償 — 元件拆分 + StatusBadge 耦合修正（14 個檔案）
+**Commit:** ceb1aef（修正後）
+
+### 發現問題
+| # | 等級 | 面向 | 檔案:行號 | 問題描述 |
+|---|---|---|---|---|
+| 1 | 🔴 | React 最佳實踐 | UsersTablePagination.tsx:6 | `getPageWindow` utility 與元件混合 export，違反 react-refresh/only-export-components |
+| 2 | 🔴 | React 最佳實踐 | UsersTableRow.tsx:5 | `formatDateUTC8` utility 與元件混合 export，同上 |
+
+### 統計
+- 🔴 Critical: 2 個（已修正）
+- 🟠 Domain Issue: 0 個
+- 🟡 Warning: 0 個
+- 🟢 Info: 0 個
+- Learnings 命中: 0 個
+
+### 修正狀態: ✅ 已修正
+---
