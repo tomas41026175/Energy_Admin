@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, within } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
 import { Sidebar } from '../Sidebar'
@@ -86,6 +86,30 @@ describe('Sidebar', () => {
     it('shows mobile overlay container', () => {
       const { container } = renderSidebar({ isOpen: true })
       expect(container.querySelector('.fixed.inset-0.z-40')).toBeInTheDocument()
+    })
+
+    it('calls onClose when nav link is clicked (auto-close on navigate)', () => {
+      const onClose = vi.fn()
+      const { container } = render(
+        <MemoryRouter future={ROUTER_FUTURE}>
+          <Sidebar isOpen={true} onClose={onClose} />
+        </MemoryRouter>,
+      )
+      const mobileOverlay = container.querySelector('.fixed.inset-0.z-40')!
+      fireEvent.click(within(mobileOverlay as HTMLElement).getByRole('link', { name: /儀表板/i }))
+      expect(onClose).toHaveBeenCalledOnce()
+    })
+
+    it('calls onClose when users nav link is clicked (auto-close on navigate)', () => {
+      const onClose = vi.fn()
+      const { container } = render(
+        <MemoryRouter future={ROUTER_FUTURE}>
+          <Sidebar isOpen={true} onClose={onClose} />
+        </MemoryRouter>,
+      )
+      const mobileOverlay = container.querySelector('.fixed.inset-0.z-40')!
+      fireEvent.click(within(mobileOverlay as HTMLElement).getByRole('link', { name: /使用者/i }))
+      expect(onClose).toHaveBeenCalledOnce()
     })
   })
 })

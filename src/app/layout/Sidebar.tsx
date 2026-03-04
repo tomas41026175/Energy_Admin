@@ -116,6 +116,7 @@ const SidebarContent = ({ onClose, collapsed = false, onToggleCollapse }: Sideba
           key={to}
           to={to}
           title={collapsed ? label : undefined}
+          onClick={onClose}
           className={({ isActive }) =>
             cn(
               'flex items-center rounded-lg text-sm font-medium transition-colors duration-150',
