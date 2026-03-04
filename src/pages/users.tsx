@@ -4,7 +4,7 @@ import { UsersTable } from '@/domains/users/UsersTable'
 import { useDebounce } from '@/shared/hooks/useDebounce'
 import { useKeyboard } from '@/shared/hooks/useKeyboard'
 import { DEBOUNCE_DELAY, PAGE_SIZE_OPTIONS } from '@/shared/constants'
-import { UsersFilterBar } from './UsersFilterBar'
+import { UsersFilterBar } from '@/domains/users/components/UsersFilterBar'
 import type { UserStatus } from '@/domains/users/users.types'
 
 const UsersPage = () => {

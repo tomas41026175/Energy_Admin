@@ -1,7 +1,8 @@
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 import { Skeleton } from '@/shared/ui/Skeleton'
+import { CHART_COLORS, CHART_INNER_RADIUS, CHART_OUTER_RADIUS } from '@/shared/constants'
 
-const PIE_COLORS = ['#16a34a', '#9ca3af'] as const
+const PIE_COLORS = [CHART_COLORS.active, CHART_COLORS.inactive] as const
 
 interface ActiveRatioChartProps {
   active: number | undefined
@@ -28,8 +29,8 @@ export const ActiveRatioChart = ({ active, inactive, isLoading }: ActiveRatioCha
                 data={data}
                 cx="50%"
                 cy="50%"
-                innerRadius={50}
-                outerRadius={80}
+                innerRadius={CHART_INNER_RADIUS}
+                outerRadius={CHART_OUTER_RADIUS}
                 dataKey="value"
                 label={({ name, percent }: { name?: string; percent?: number }) =>
                   `${name ?? ''} ${((percent ?? 0) * 100).toFixed(0)}%`

@@ -1,5 +1,6 @@
 import type { RefObject } from 'react'
 import { Input } from '@/shared/ui/Input'
+import { ClearIcon, ChevronDownIcon } from '@/shared/icons'
 import { PAGE_SIZE_OPTIONS } from '@/shared/constants'
 import type { UserStatus } from '@/domains/users/users.types'
 
@@ -8,41 +9,6 @@ const STATUS_OPTIONS: { value: UserStatus | ''; label: string }[] = [
   { value: 'active', label: '啟用' },
   { value: 'inactive', label: '停用' },
 ]
-
-const ChevronDownIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="14"
-    height="14"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-  >
-    <polyline points="6 9 12 15 18 9" />
-  </svg>
-)
-
-const ClearIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="14"
-    height="14"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-  >
-    <line x1="18" y1="6" x2="6" y2="18" />
-    <line x1="6" y1="6" x2="18" y2="18" />
-  </svg>
-)
 
 const SELECT_CLASS = 'w-full appearance-none px-3 py-2 pr-8 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
 

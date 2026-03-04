@@ -1,26 +1,15 @@
+import { memo } from 'react'
 import { UserAvatar } from '@/shared/components/UserAvatar'
 import { StatusBadge } from '@/shared/components/StatusBadge'
+import { formatDateUTC8 } from '@/shared/utils/date'
 import type { User } from '../users.types'
-
-const formatDateUTC8 = (dateStr: string): string => {
-  const date = new Date(dateStr)
-  if (isNaN(date.getTime())) return dateStr
-  const isDateOnly = /^\d{4}-\d{2}-\d{2}$/.test(dateStr)
-  return new Intl.DateTimeFormat('zh-TW', {
-    timeZone: 'Asia/Taipei',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    ...(isDateOnly ? {} : { hour: '2-digit', minute: '2-digit' }),
-  }).format(date)
-}
 
 interface TableRowProps {
   user: User
   index: number
 }
 
-export const TableRow = ({ user, index }: TableRowProps) => (
+export const TableRow = memo(({ user, index }: TableRowProps) => (
   <tr
     className="hover:bg-gray-50 transition-colors duration-100 animate-fade-in [animation-fill-mode:backwards]"
     style={{ animationDelay: `${index * 30}ms` }}
@@ -42,14 +31,14 @@ export const TableRow = ({ user, index }: TableRowProps) => (
       {formatDateUTC8(user.created_at)}
     </td>
   </tr>
-)
+))
 
 interface UserCardProps {
   user: User
   index: number
 }
 
-export const UserCard = ({ user, index }: UserCardProps) => (
+export const UserCard = memo(({ user, index }: UserCardProps) => (
   <div
     className="bg-white rounded-lg border border-gray-200 p-4 animate-fade-in [animation-fill-mode:backwards]"
     style={{ animationDelay: `${index * 40}ms` }}
@@ -67,4 +56,4 @@ export const UserCard = ({ user, index }: UserCardProps) => (
     </div>
     <p className="text-xs text-gray-400 mt-2 text-right">{formatDateUTC8(user.created_at)}</p>
   </div>
-)
+))
