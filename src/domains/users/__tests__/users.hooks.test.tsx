@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll, afterEach } from 'vitest'
+import { describe, it, expect, beforeAll, afterAll, afterEach, vi } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { http, HttpResponse } from 'msw'
@@ -25,7 +25,7 @@ const createWrapper = () => {
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   )
 
-  return Wrapper
+  return { Wrapper, queryClient }
 }
 
 describe('useUsers', () => {
@@ -40,8 +40,9 @@ describe('useUsers', () => {
       }),
     )
 
+    const { Wrapper } = createWrapper()
     const { result } = renderHook(() => useUsers({ page: 1 }), {
-      wrapper: createWrapper(),
+      wrapper: Wrapper,
     })
 
     expect(result.current.isLoading).toBe(true)
@@ -62,8 +63,9 @@ describe('useUsers', () => {
       }),
     )
 
+    const { Wrapper } = createWrapper()
     const { result } = renderHook(() => useUsers({ page: 1 }), {
-      wrapper: createWrapper(),
+      wrapper: Wrapper,
     })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
@@ -79,12 +81,45 @@ describe('useUsers', () => {
       }),
     )
 
+    const { Wrapper } = createWrapper()
     const { result } = renderHook(() => useUsers({ page: 1 }), {
-      wrapper: createWrapper(),
+      wrapper: Wrapper,
     })
 
     await waitFor(() => expect(result.current.isError).toBe(true))
 
     expect(result.current.error).toBeTruthy()
+  })
+
+  it('should prefetch next page when current page data loads', async () => {
+    let requestCount = 0
+    server.use(
+      http.get(`${API_BASE}/api/users`, ({ request }) => {
+        requestCount++
+        const url = new URL(request.url)
+        const page = url.searchParams.get('page') ?? '1'
+        return HttpResponse.json({
+          data: [
+            { id: 1, name: 'Test', email: 'test@test.com', avatar: '', status: 'active', created_at: '2026-01-01' },
+          ],
+          pagination: { total: 20, current_page: Number(page), per_page: 10, total_pages: 2 },
+        })
+      }),
+    )
+
+    const { Wrapper, queryClient } = createWrapper()
+    const prefetchSpy = vi.spyOn(queryClient, 'prefetchQuery')
+
+    renderHook(() => useUsers({ page: 1, limit: 10 }), { wrapper: Wrapper })
+
+    // 等待主查詢完成
+    await waitFor(() => expect(requestCount).toBeGreaterThanOrEqual(1))
+
+    // prefetchQuery 應被呼叫以預取下一頁
+    await waitFor(() => expect(prefetchSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        queryKey: expect.arrayContaining([expect.objectContaining({ page: 2 })]),
+      })
+    ))
   })
 })
