@@ -356,6 +356,110 @@ useEffect(() => {
 
 ---
 
+### 16. i18n 錯誤訊息中文化
+
+**決策**：所有使用者可見的錯誤訊息改為繁體中文，不直接傳遞後端英文訊息。
+
+**理由**：
+- 提升使用者體驗（用戶使用中文介面）
+- 統一錯誤訊息風格（前端全體負責文字呈現）
+- 後端無需關切客戶端呈現語言
+- 便於未來的多語言支援
+
+**實作方式**：
+- Zod Schema 驗證訊息使用中文（如 `請輸入帳號`, `密碼至少需要 6 個字元`）
+- API 攔截器 (`error-handler.ts`) 將所有 HTTP 狀態碼轉換為固定中文訊息：
+  - 401 → `帳號或密碼錯誤，請重新確認`（登入失敗）或 `登入工作階段已過期，請重新登入`（Token 過期）
+  - 400 → `輸入資料有誤`
+  - 5xx → `伺服器錯誤，請稍後再試`
+  - 其他 → `請求失敗，請稍後再試`
+  - 網路錯誤 → `網路連線錯誤`
+
+**錯誤類別對應表**：
+
+| 錯誤類別 | 預設訊息 | 適用情況 |
+|---------|--------|--------|
+| `AuthError` | `帳號或密碼錯誤` | 登入失敗或 Token 無效 |
+| `AuthError` | `登入工作階段已過期，請重新登入` | Token 過期或刷新失敗 |
+| `ValidationError` | `輸入資料有誤` | 400 Bad Request |
+| `ServerError` | `伺服器錯誤，請稍後再試` | 5xx 伺服器錯誤 |
+| `NetworkError` | `網路連線錯誤` | 無網路連線 |
+| `AppError` | `請求失敗，請稍後再試` | 其他 HTTP 錯誤 |
+
+**影響**：
+- 後端回應的 error message 不再呈現給使用者
+- UI 層完全由前端控制訊息文字
+- 易於測試（訊息固定且全為中文）
+
+---
+
+### 17. 行動版 Sidebar 自動收合
+
+**決策**：在行動版（小螢幕）點擊導覽連結後，Sidebar 自動收合。
+
+**理由**：
+- 行動版螢幕有限，導覽後應主動隱藏以騰出空間
+- 改善行動體驗，減少使用者操作步驟
+- Desktop 版本導航欄保持展開（sticky 側欄）
+
+**實作方式**：
+- 監聽導覽連結的 click 事件
+- 在行動版時設定 `collapsed = true`（透過 `window.matchMedia` 偵測）
+- Desktop 版本（lg 以上）不觸發自動收合
+
+**影響**：
+- 行動使用者體驗改善
+- 導覽後自動清出閱讀區域
+
+---
+
+### 18. 圖表 Focus Outline 移除
+
+**決策**：在圖表 SVG 元素上加 `aria-hidden="true"` 並使用 `[&_svg_*]:outline-none` 移除 focus border。
+
+**理由**：
+- Recharts 圖表是裝飾性元素，不需要鍵盤交互
+- SVG 子元素預設可 focus，造成視覺混亂
+- `aria-hidden="true"` 告知螢幕閱讀器忽略圖表
+- 用 Tailwind 的任意變體 `[&_svg_*]` 高效地移除所有 SVG 子元素的 outline
+
+**實作方式**：
+```tsx
+<div aria-hidden="true" className="[&_svg_*]:outline-none">
+  <ResponsiveContainer>
+    {/* Recharts chart */}
+  </ResponsiveContainer>
+</div>
+```
+
+**影響**：
+- 保留圖表視覺效果，避免 focus 污染
+- 無障礙體驗更好（螢幕閱讀器跳過圖表）
+- 鍵盤使用者不會意外進入圖表元素
+
+---
+
+### 19. iOS Safari auto-zoom 修正
+
+**決策**：Input 元素改用 `text-base md:text-sm`（行動版 16px，Desktop 14px）。
+
+**理由**：
+- iOS Safari 會自動縮放 < 16px 的 Input，造成視覺混亂
+- 16px 是 iOS 的自動縮放閾值
+- Desktop 版本仍使用 14px（不需要自動縮放）
+
+**實作方式**：
+```tsx
+<input className="text-base md:text-sm" />
+```
+
+**影響**：
+- iOS 上 Input focus 時不再自動縮放頁面
+- 改善行動端表單輸入體驗
+- Desktop 版本保持原有 14px 字級
+
+---
+
 ## 🔄 未來可能的調整
 
 ### 1. 狀態管理

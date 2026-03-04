@@ -116,24 +116,28 @@ AuthGuard
 | 差異化 Empty State | 無搜尋結果 vs 尚無使用者，顯示不同提示 |
 | 鍵盤快捷鍵 | `/` 聚焦搜尋框，`Esc` 清除搜尋 |
 | 搜尋清除按鈕 | 輸入非空時顯示 ✕，並提示「共 N 筆結果」 |
-| Sidebar 收合 | Desktop: w-64 ↔ w-16（icon-only + tooltip） |
+| Sidebar 收合 | Desktop: w-64 ↔ w-16（icon-only + tooltip）；行動版點擊導覽自動收合 |
 | 離線 Banner | `useNetworkStatus` 偵測，斷線時頂部提示列 |
 | Sticky Header | 頁面捲動時保持頂部導覽列 |
-| Toast 通知 | 登出、錯誤等操作的使用者回饋 |
+| Toast 通知 | 登出、錯誤等操作的使用者回饋；所有訊息改為中文 |
 | 響應式設計 | Mobile overlay sidebar / Desktop sticky sidebar |
+| 圖表無障礙 | Recharts 加 `aria-hidden="true"` + `[&_svg_*]:outline-none` |
+| iOS 表單優化 | Input `text-base md:text-sm` 避免 iOS Safari 自動縮放 |
 
 ---
 
 ## 錯誤處理架構
 
-攔截器將所有 Axios error 正規化為 `AppError`，UI 層只處理 domain level error：
+攔截器將所有 Axios error 正規化為 `AppError`，UI 層只處理 domain level error。所有使用者可見的錯誤訊息改為繁體中文，不直接傳遞後端英文訊息：
 
-| 等級 | 觸發情境 | 處理方式 |
-|------|---------|---------|
-| Critical | 401 AuthError | 強制登出 |
-| Recoverable | 網路錯誤、5xx | Toast 提示 + 可重試 |
-| Warning | 一般業務錯誤 | Toast 提示 |
-| Validation | 400 Bad Request | 表單欄位錯誤訊息 |
+| 等級 | 觸發情境 | 中文訊息 | 處理方式 |
+|------|---------|--------|---------|
+| Critical | 401 AuthError (Token 無效) | `帳號或密碼錯誤，請重新確認` | 強制登出 |
+| Critical | 401 AuthError (Token 過期) | `登入工作階段已過期，請重新登入` | 自動刷新 + 重試 |
+| Recoverable | 網路錯誤 | `網路連線錯誤` | Toast 提示 + 可重試 |
+| Recoverable | 5xx 伺服器錯誤 | `伺服器錯誤，請稍後再試` | Toast 提示 + 可重試 |
+| Warning | 其他錯誤 | `請求失敗，請稍後再試` | Toast 提示 |
+| Validation | 400 Bad Request | `輸入資料有誤` + Zod 欄位訊息 | 表單欄位錯誤提示 |
 
 ---
 
@@ -209,6 +213,22 @@ jobs:
 - [03-implementation-guide.md](./03-implementation-guide.md) — 詳細實作指南
 - [04-api-documentation.md](./04-api-documentation.md) — API 端點規格
 - [05-testing-strategy.md](./05-testing-strategy.md) — 測試策略
+
+---
+
+---
+
+## 最近更新（Phase 7）
+
+**日期**: 2026-03-04
+
+**變更摘要**：
+- 錯誤訊息全面中文化（PR #25, #28）：所有 API 錯誤改用統一的中文訊息，不傳遞後端英文
+- 行動版 Sidebar 自動收合（PR #20）：點擊導覽連結後自動隱藏 Sidebar
+- 圖表 focus outline 移除（PR #22, #26）：使用 `aria-hidden="true"` 和 `[&_svg_*]:outline-none`
+- iOS Safari 自動縮放修正（PR #23）：Input 元件改用 `text-base md:text-sm`
+
+詳細內容見 [02-technical-decisions.md](./02-technical-decisions.md) 的第 16-19 決策。
 
 ---
 

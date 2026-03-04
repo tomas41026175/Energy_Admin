@@ -97,6 +97,8 @@ Content-Type: application/json
 - 缺少必填欄位
 - 參數格式不正確
 
+**前端處理**：轉換為中文訊息 `輸入資料有誤`
+
 #### 401 Unauthorized
 
 使用者名稱或密碼錯誤。
@@ -106,6 +108,8 @@ Content-Type: application/json
   "message": "Username or password is incorrect"
 }
 ```
+
+**前端處理**：轉換為中文訊息 `帳號或密碼錯誤，請重新確認`
 
 #### 415 Unsupported Media Type
 
@@ -143,6 +147,8 @@ Content-Type 標頭不正確。
 - Token 生成失敗
 - Refresh Token 生成失敗
 - 伺服器內部錯誤
+
+**前端處理**：轉換為中文訊息 `伺服器錯誤，請稍後再試`
 
 ---
 
@@ -265,6 +271,8 @@ Content-Type 標頭不正確。
 **可能原因：**
 - Token 生成失敗
 - 伺服器內部錯誤
+
+**前端處理**：轉換為中文訊息 `伺服器錯誤，請稍後再試`
 
 ---
 
@@ -443,15 +451,15 @@ Authorization: Bearer your_access_token_here
 
 **錯誤代碼說明：**
 
-| 錯誤代碼 | 說明 |
-|---------|------|
-| `INVALID_TOKEN` | Token 格式錯誤或無效 |
-| `TOKEN_EXPIRED` | Token 已過期 |
+| 錯誤代碼 | 說明 | 前端中文訊息 |
+|---------|------|-----------|
+| `INVALID_TOKEN` | Token 格式錯誤或無效 | `帳號或密碼錯誤，請重新確認` |
+| `TOKEN_EXPIRED` | Token 已過期 | `登入工作階段已過期，請重新登入` |
 
-**處理方式：**
-- 檢查 Authorization 標頭是否正確設定
-- Token 過期時，使用 Refresh Token 刷新 Access Token
-- 刷新失敗時，清除所有 Token 並導向登入頁面
+**前端處理方式：**
+- 攔截器自動檢測 `TOKEN_EXPIRED` 錯誤代碼，使用 Refresh Token 刷新 Access Token
+- 刷新成功後自動重試原始請求（使用者無感）
+- 刷新失敗或無 Refresh Token 時，清除所有 Token 並導向登入頁面，顯示中文訊息 `登入工作階段已過期，請重新登入`
 
 #### 500 Internal Server Error
 
@@ -467,9 +475,7 @@ Authorization: Bearer your_access_token_here
 - 資料庫連線失敗
 - 伺服器內部錯誤
 
-**處理方式：**
-- 記錄錯誤並顯示適當的使用者提示
-- 可實作重試機制
+**前端處理**：轉換為中文訊息 `伺服器錯誤，請稍後再試`，並提供重試按鈕
 
 ---
 
@@ -516,8 +522,21 @@ Content-Type: application/json
 
 1. **Content-Type 標頭**：所有 POST 請求必須包含 `Content-Type: application/json` 標頭
 2. **Token 過期處理**：Access Token 過期時應自動使用 Refresh Token 進行刷新
-3. **錯誤處理**：應妥善處理各種錯誤狀態碼，並提供適當的使用者提示
+3. **錯誤處理**：所有 HTTP 錯誤應轉換為統一的中文訊息（不直接呈現後端英文）
 4. **安全性**：Access Token 應儲存在記憶體中，避免 XSS 攻擊風險
+
+## 🌐 前端錯誤訊息對應表
+
+前端攔截器將所有 Axios 錯誤正規化為中文訊息，確保使用者體驗一致：
+
+| HTTP 狀態碼 | 錯誤代碼 | 後端訊息範例 | 前端中文訊息 |
+|-----------|--------|----------|----------|
+| 401 | `INVALID_TOKEN` / `INVALID_REFRESH_TOKEN` | `Unauthorized` | `帳號或密碼錯誤，請重新確認` |
+| 401 | `TOKEN_EXPIRED` / `REFRESH_TOKEN_EXPIRED` | `Token expired` | `登入工作階段已過期，請重新登入` |
+| 400 | - | `Invalid request body` | `輸入資料有誤` |
+| 500-599 | - | `Internal server error` | `伺服器錯誤，請稍後再試` |
+| 無網路 | - | - | `網路連線錯誤` |
+| 其他 | - | - | `請求失敗，請稍後再試` |
 
 ---
 
