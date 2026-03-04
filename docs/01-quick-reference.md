@@ -203,30 +203,32 @@ try {
 // auth/auth.schemas.ts
 import { z } from 'zod';
 
-// 定義 Schema
-export const LoginCredentialsSchema = z.object({
-  username: z.string().min(1, '使用者名稱不可為空'),
-  password: z.string().min(1, '密碼不可為空'),
+// 定義 Schema（驗證訊息改為中文）
+export const loginRequestSchema = z.object({
+  username: z.string().min(1, '請輸入帳號'),
+  password: z.string().min(6, '密碼至少需要 6 個字元'),
 });
 
 // 從 Schema 推導型別
-export type LoginCredentials = z.infer<typeof LoginCredentialsSchema>;
+export type LoginRequestInput = z.infer<typeof loginRequestSchema>;
 
 // auth/auth.api.ts
-import { LoginCredentialsSchema, LoginResponseSchema } from './auth.schemas';
+import { loginRequestSchema, loginResponseSchema } from './auth.schemas';
 
 export const authApi = {
-  login: async (credentials: LoginCredentials) => {
+  login: async (credentials: LoginRequestInput) => {
     // 驗證輸入
-    const validated = LoginCredentialsSchema.parse(credentials);
+    const validated = loginRequestSchema.parse(credentials);
 
-    const response = await apiClient.post('/auth/login', validated);
+    const response = await apiClient.post('/auth', validated);
 
     // 驗證輸出（確保 API 回應符合預期）
-    return LoginResponseSchema.parse(response.data);
+    return loginResponseSchema.parse(response.data);
   },
 };
 ```
+
+**驗證訊息改為中文**：所有 Zod 訊息使用中文，如 `請輸入帳號` 而非 `Username is required`，提升使用者體驗。
 
 ---
 
@@ -259,6 +261,22 @@ export const authApi = {
 
 ---
 
+## 🌐 錯誤訊息本地化
+
+從 Phase 7 開始，所有使用者可見的錯誤訊息改為繁體中文，不直接呈現後端英文：
+
+**表單驗證訊息**（Zod Schema）：
+- `請輸入帳號` / `密碼至少需要 6 個字元`
+
+**API 錯誤訊息**（攔截器統一轉換）：
+- 401: `帳號或密碼錯誤，請重新確認` / `登入工作階段已過期，請重新登入`
+- 400: `輸入資料有誤`
+- 5xx: `伺服器錯誤，請稍後再試`
+- 網路錯誤: `網路連線錯誤`
+- 其他: `請求失敗，請稍後再試`
+
+參考 [04-api-documentation.md](./04-api-documentation.md) 的「前端錯誤訊息對應表」。
+
 ## 🔍 常見問題
 
 ### Q: 為什麼 Access Token 存在記憶體而非 localStorage？
@@ -272,6 +290,14 @@ A: 使用 `isRefreshing` lock 與請求佇列機制，確保只觸發一次 refr
 ### Q: 重新整理後如何恢復登入狀態？
 
 A: App 啟動時從 localStorage 讀取 refresh token，嘗試刷新取得新的 access token。
+
+### Q: 為什麼錯誤訊息改為中文而非直接使用後端訊息？
+
+A: 後端回應的訊息是英文（API 層），前端應確保使用者介面語言一致（全中文）。攔截器統一轉換後端錯誤碼為固定的中文訊息，便於維護與多語言支援。
+
+### Q: 為什麼 Input 元素要用 `text-base md:text-sm`？
+
+A: iOS Safari 會自動縮放 < 16px 的 Input，造成視覺混亂。16px 是 iOS 的自動縮放閾值。Desktop 版本仍使用 14px（不需要自動縮放）。
 
 ---
 
