@@ -501,3 +501,28 @@
 
 ### 修正狀態: ✅ 已修正
 ---
+
+## [2026-03-04 12:30] CR #11 — feat/tech-debt-full-cleanup
+
+**審查範圍:** Technical Audit 全面修復 — 8 個 Phase（A1-H2），共 9 個 commit
+**Commit:** 9b45c7d（修正後最終）
+
+### 發現問題
+| # | 等級 | 面向 | 檔案:行號 | 問題描述 |
+|---|---|---|---|---|
+| 1 | 🟡 | 測試覆蓋 | handlers.ts:59-66 | `/auth` mock 的 `user` 物件含 `id` 欄位但 AuthUser 介面無此欄位，且缺少 `role` |
+| 2 | 🟡 | 測試覆蓋 | token-store.ts:全 | 新增的 accessTokenExpiry 過期邏輯未有測試覆蓋 |
+
+### 統計
+- 🔴 Critical: 0 個
+- 🟠 Domain Issue: 0 個
+- 🟡 Warning: 2 個（已修正）
+- 🟢 Info: 0 個
+- Learnings 命中: 0 個
+
+### 修正內容
+1. `handlers.ts`: `user: { username: 'admin', role: 'admin' }`（移除多餘 id，補正 role）
+2. `token-store.test.ts`: 新增 3 個使用 vi.useFakeTimers() 的過期邏輯測試
+
+### 修正狀態: ✅ 已修正
+---
