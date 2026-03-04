@@ -526,3 +526,22 @@
 
 ### 修正狀態: ✅ 已修正
 ---
+
+## [2026-03-04 12:10] CR #10 — fix/sort-icon-spacing
+
+**審查範圍:** UsersTableHeader.tsx — 排序 icon 間距微調（2 行 class 變更）
+**Commit:** 460980b
+
+### 發現問題
+無
+
+### 統計
+- 🔴 Critical: 0 個
+- 🟠 Domain Issue: 0 個
+- 🟡 Warning: 0 個
+- 🟢 Info: 0 個
+- Learnings 命中: 0 個
+- Domain Rules 命中: 0 個
+
+### 修正狀態: ✅ 已修正
+---
