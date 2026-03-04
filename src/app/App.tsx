@@ -16,9 +16,25 @@ const SessionRestore = () => {
   return null
 }
 
+// useEffect allowed here: 全域 unhandled rejection 監聽，非 Query 可取代的副作用
+const GlobalErrorListener = () => {
+  useEffect(() => {
+    const handler = (e: PromiseRejectionEvent): void => {
+      // Production: 可整合 Sentry 等錯誤追蹤服務
+      // eslint-disable-next-line no-console
+      console.warn('[UnhandledRejection]', e.reason)
+    }
+    window.addEventListener('unhandledrejection', handler)
+    return () => window.removeEventListener('unhandledrejection', handler)
+  }, [])
+
+  return null
+}
+
 const App = () => (
   <ErrorBoundary>
     <AppProviders>
+      <GlobalErrorListener />
       <SessionRestore />
       <RouterProvider router={router} future={{ v7_startTransition: true }} />
     </AppProviders>

@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState, type ReactNode } from 'react'
 import { cn } from '@/shared/utils/cn'
 import { ToastContext, type Toast, type ToastType } from '@/shared/hooks/useToast'
+import { TOAST_DISMISS_MS } from '@/shared/constants'
 
 interface ToastProviderProps {
   children: ReactNode
@@ -48,8 +49,8 @@ export const ToastProvider = ({ children }: ToastProviderProps) => {
     (type: ToastType, message: string) => {
       const id = crypto.randomUUID()
       setToasts((prev) => [...prev, { id, type, message }])
-      // Start leave animation at 2800ms so element removes at 3000ms total
-      const timer = setTimeout(() => startLeave(id), 2800)
+      // Start leave animation at TOAST_DISMISS_MS so element removes at ~3000ms total
+      const timer = setTimeout(() => startLeave(id), TOAST_DISMISS_MS)
       autoTimersRef.current.set(id, timer)
     },
     [startLeave],

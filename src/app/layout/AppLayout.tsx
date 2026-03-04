@@ -4,6 +4,7 @@ import { useAuthStore } from '@/auth/auth.store'
 import { useToast } from '@/shared/hooks/useToast'
 import { useNetworkStatus } from '@/shared/hooks/useNetworkStatus'
 import { Button } from '@/shared/ui/Button'
+import { HamburgerIcon } from '@/shared/icons'
 import { Sidebar } from './Sidebar'
 
 export const AppLayout = () => {
@@ -48,9 +49,7 @@ export const AppLayout = () => {
             onClick={() => setSidebarOpen(true)}
             aria-label="開啟選單"
           >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
+            <HamburgerIcon />
           </button>
 
           {/* Right side: username + logout */}

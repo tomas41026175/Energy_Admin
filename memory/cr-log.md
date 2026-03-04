@@ -447,6 +447,40 @@
 ### 修正狀態: ✅ 已修正
 ---
 
+## 常見錯誤 Pattern（CR 自動攔截清單）
+
+### P1. SVG 圖示重複定義
+- **症狀**: 同一圖示（ClearIcon、ChevronDownIcon 等）在多個元件各自定義本地 SVG
+- **修正**: 提取至 `src/shared/icons/index.tsx` 統一管理，元件改為 import
+- **攔截**: CR 時搜尋 `const \w+Icon = \(\) =>` 是否有跨檔重複定義
+
+### P2. 魔法數字未提取
+- **症狀**: `setTimeout(..., 2800)`、`innerRadius={50}`、`total <= 7` 等硬編碼數值
+- **修正**: 提取至 `src/shared/constants.ts` 命名常數（TOAST_DISMISS_MS、CHART_INNER_RADIUS 等）
+- **攔截**: CR 時檢查數值是否具業務意義、是否可能多處使用
+
+### P3. 列表元件缺 React.memo
+- **症狀**: `TableRow`、`UserCard`、`RecentUserRow` 等列表 item 未用 memo 包裝
+- **修正**: 對列表 item 元件加 `memo()`
+- **攔截**: CR 時確認渲染於 `.map()` 的元件是否有 React.memo
+
+### P4. API 層未做 Zod runtime 驗證
+- **症狀**: `getUsers()` 直接回傳 `.then(r => r.data)`，無 runtime schema 驗證
+- **修正**: 加入 `zodSchema.parse(r.data)`
+- **攔截**: CR 時確認每個 API 函式是否有 Zod parse
+
+### P5. MSW mock 回應與型別定義不一致
+- **症狀**: `/auth` mock 缺少 `expires_in`/`user`，`/auth/refresh` 多餘 `refresh_token`
+- **修正**: 對齊 `auth.types.ts` 的 `LoginResponse` 欄位
+- **攔截**: CR 時比對 handlers.ts 回應 shape 與 types.ts
+
+### P6. Refresh token 存 localStorage（已知風險）
+- **風險**: XSS 可讀取 localStorage 的 refresh_token；理想做法是 HttpOnly Cookie（需後端）
+- **現狀**: 已知技術債，前端無法單獨完成，留存說明
+- **攔截**: 不將 token 存於 localStorage；若後端支援 HttpOnly Cookie 優先採用
+
+---
+
 ## [2026-03-04 11:52] CR #7 — refactor/tech-debt-cleanup
 
 **審查範圍:** 技術債清償 — 元件拆分 + StatusBadge 耦合修正（14 個檔案）
@@ -464,6 +498,31 @@
 - 🟡 Warning: 0 個
 - 🟢 Info: 0 個
 - Learnings 命中: 0 個
+
+### 修正狀態: ✅ 已修正
+---
+
+## [2026-03-04 12:30] CR #11 — feat/tech-debt-full-cleanup
+
+**審查範圍:** Technical Audit 全面修復 — 8 個 Phase（A1-H2），共 9 個 commit
+**Commit:** 9b45c7d（修正後最終）
+
+### 發現問題
+| # | 等級 | 面向 | 檔案:行號 | 問題描述 |
+|---|---|---|---|---|
+| 1 | 🟡 | 測試覆蓋 | handlers.ts:59-66 | `/auth` mock 的 `user` 物件含 `id` 欄位但 AuthUser 介面無此欄位，且缺少 `role` |
+| 2 | 🟡 | 測試覆蓋 | token-store.ts:全 | 新增的 accessTokenExpiry 過期邏輯未有測試覆蓋 |
+
+### 統計
+- 🔴 Critical: 0 個
+- 🟠 Domain Issue: 0 個
+- 🟡 Warning: 2 個（已修正）
+- 🟢 Info: 0 個
+- Learnings 命中: 0 個
+
+### 修正內容
+1. `handlers.ts`: `user: { username: 'admin', role: 'admin' }`（移除多餘 id，補正 role）
+2. `token-store.test.ts`: 新增 3 個使用 vi.useFakeTimers() 的過期邏輯測試
 
 ### 修正狀態: ✅ 已修正
 ---

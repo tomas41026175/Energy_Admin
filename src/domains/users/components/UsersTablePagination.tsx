@@ -1,36 +1,20 @@
 import { cn } from '@/shared/utils/cn'
 import { Button } from '@/shared/ui/Button'
+import { ChevronIcon } from '@/shared/icons'
+import { PAGINATION_WINDOW_SIZE } from '@/shared/constants'
 
 const ELLIPSIS = '...' as const
 
 const getPageWindow = (current: number, total: number): (number | typeof ELLIPSIS)[] => {
-  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
+  // 頁數少於等於視窗大小，直接全部顯示
+  if (total <= PAGINATION_WINDOW_SIZE) return Array.from({ length: total }, (_, i) => i + 1)
+  // 目前頁靠近開頭：顯示前 5 頁 + 省略 + 最後一頁
   if (current <= 4) return [1, 2, 3, 4, 5, ELLIPSIS, total]
+  // 目前頁靠近末尾：顯示第一頁 + 省略 + 最後 5 頁
   if (current >= total - 3) return [1, ELLIPSIS, total - 4, total - 3, total - 2, total - 1, total]
+  // 目前頁在中間：顯示第一頁 + 省略 + 前後各一頁 + 省略 + 最後一頁
   return [1, ELLIPSIS, current - 1, current, current + 1, ELLIPSIS, total]
 }
-
-const CHEVRON_POINTS = {
-  left: '15 18 9 12 15 6',
-  right: '9 18 15 12 9 6',
-} as const
-
-const ChevronIcon = ({ direction }: { direction: keyof typeof CHEVRON_POINTS }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-  >
-    <polyline points={CHEVRON_POINTS[direction]} />
-  </svg>
-)
 
 interface UsersTablePaginationProps {
   currentPage: number

@@ -42,7 +42,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
   login: async (data: LoginRequest): Promise<void> => {
     const response = await authApi.login(data)
-    tokenStore.setAccessToken(response.access_token)
+    tokenStore.setAccessToken(response.access_token, response.expires_in)
     tokenStore.setRefreshToken(response.refresh_token)
     setStoredUser(response.user)
     set({ user: response.user, isAuthenticated: true, isLoading: false })
@@ -63,7 +63,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
     try {
       const response = await authApi.refreshToken(refreshToken)
-      tokenStore.setAccessToken(response.access_token)
+      tokenStore.setAccessToken(response.access_token, response.expires_in)
       const user = getStoredUser()
       if (user) {
         set({ user, isAuthenticated: true, isLoading: false })

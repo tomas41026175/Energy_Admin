@@ -1,10 +1,15 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import { tokenStore } from '../token-store'
 
 describe('tokenStore', () => {
   beforeEach(() => {
     tokenStore.clearAll()
     localStorage.clear()
+    vi.useRealTimers()
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
   })
 
   describe('access token', () => {
@@ -21,6 +26,27 @@ describe('tokenStore', () => {
       tokenStore.setAccessToken('abc123')
       tokenStore.setAccessToken(null)
       expect(tokenStore.getAccessToken()).toBeNull()
+    })
+
+    it('returns token before expiry when expiresIn provided', () => {
+      vi.useFakeTimers()
+      tokenStore.setAccessToken('valid-token', 300)
+      vi.advanceTimersByTime(299_000)
+      expect(tokenStore.getAccessToken()).toBe('valid-token')
+    })
+
+    it('returns null after expiry when expiresIn provided', () => {
+      vi.useFakeTimers()
+      tokenStore.setAccessToken('expiring-token', 300)
+      vi.advanceTimersByTime(301_000)
+      expect(tokenStore.getAccessToken()).toBeNull()
+    })
+
+    it('returns token indefinitely when no expiresIn provided', () => {
+      vi.useFakeTimers()
+      tokenStore.setAccessToken('no-expiry-token')
+      vi.advanceTimersByTime(999_999_000)
+      expect(tokenStore.getAccessToken()).toBe('no-expiry-token')
     })
   })
 
